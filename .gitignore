@@ -1,0 +1,25 @@
+# =========================
+# Backend (Spring Boot / Java)
+# =========================
+api/target/
+api/!.mvn/wrapper/maven-wrapper.jar
+api/log/
+api/logs/
+**/*.class
+**/*.log
+
+# =========================
+# Frontend (React / Node)
+# =========================
+client/node_modules/
+client/dist/
+client/build/
+client/.env
+client/.env.local
+
+# =========================
+# IDEs and OS Files
+# =========================
+.idea/
+.vscode/
+.DS_Store
