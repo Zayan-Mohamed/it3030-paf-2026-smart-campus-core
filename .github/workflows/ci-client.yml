@@ -1,0 +1,39 @@
+name: Client CI
+
+on:
+    push:
+        branches: ["main"]
+        paths:
+            - "client/**"
+            - ".github/workflows/ci-client.yml"
+    pull_request:
+        branches: ["main"]
+        paths:
+            - "client/**"
+            - ".github/workflows/ci-client.yml"
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+        defaults:
+            run:
+                working-directory: ./client
+
+        steps:
+            - uses: actions/checkout@v4
+
+            - name: Use Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: "20.x"
+                  cache: "npm"
+                  cache-dependency-path: "./client/package.json"
+
+            - name: Install dependencies
+              run: npm install
+
+            - name: Lint
+              run: npm run lint --if-present
+
+            - name: Build
+              run: npm run build
