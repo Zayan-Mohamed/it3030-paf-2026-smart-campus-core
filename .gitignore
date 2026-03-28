@@ -4,6 +4,9 @@
 api/target/
 api/!.mvn/wrapper/maven-wrapper.jar
 api/log/
+api/.env
+api/.env.*
+!api/.env.example
 api/logs/
 **/*.class
 **/*.log
