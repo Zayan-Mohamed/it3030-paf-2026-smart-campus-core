@@ -18,6 +18,7 @@ export const Navbar = () => {
       <div className="navbar-menu">
         {user ? (
           <>
+            <Link to="/facilities" className="navbar-link">Facilities</Link>
             <span className="navbar-user">{user.email}</span>
             <button onClick={handleLogout} className="btn-logout">Logout</button>
           </>
