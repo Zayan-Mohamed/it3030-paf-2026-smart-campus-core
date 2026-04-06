@@ -7,11 +7,13 @@ import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 /**
  * Facility entity representing bookable campus facilities
@@ -24,6 +26,7 @@ import java.time.LocalDateTime;
 })
 @Data
 @Builder
+
 @NoArgsConstructor
 @AllArgsConstructor
 public class Facility {
@@ -72,6 +75,7 @@ public class Facility {
      */
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
+    @NotNull(message = "Facility status is required")
     @Builder.Default
     private FacilityStatus status = FacilityStatus.AVAILABLE;
     
@@ -85,6 +89,20 @@ public class Facility {
      * Amenities available (comma-separated)
      */
     private String amenities;
+    
+    /**
+     * Available from time
+     */
+    @Column(name = "available_from", nullable = false)
+    @NotNull(message = "Available from time is required")
+    private LocalTime availableFrom;
+    
+    /**
+     * Available to time
+     */
+    @Column(name = "available_to", nullable = false)
+    @NotNull(message = "Available to time is required")
+    private LocalTime availableTo;
     
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)

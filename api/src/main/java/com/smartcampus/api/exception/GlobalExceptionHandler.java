@@ -15,6 +15,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -38,22 +39,34 @@ public class GlobalExceptionHandler {
             MethodArgumentNotValidException ex,
             HttpServletRequest request
     ) {
-        Map<String, String> errors = new HashMap<>();
+        Map<String, String> fieldErrors = new HashMap<>();
         ex.getBindingResult().getAllErrors().forEach(error -> {
             String fieldName = ((FieldError) error).getField();
             String errorMessage = error.getDefaultMessage();
-            errors.put(fieldName, errorMessage);
+            fieldErrors.put(fieldName, errorMessage);
         });
 
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .status(HttpStatus.BAD_REQUEST.value())
                 .error("Validation Error")
+<<<<<<< HEAD
                 .message("Invalid input: " + errors)
+=======
+                .message("Invalid input provided")
+>>>>>>> c3332a4 (Module A: Completed Facility backend and frontend with API integration)
                 .path(request.getRequestURI())
+                .timestamp(LocalDateTime.now())
+                .details(fieldErrors)
                 .build();
+<<<<<<< HEAD
 
         log.warn("Validation error on {}: {} fields failed", request.getRequestURI(), errors.size());
 
+=======
+        
+        log.warn("Validation error on {}: {} fields failed", request.getRequestURI(), fieldErrors.size());
+        
+>>>>>>> c3332a4 (Module A: Completed Facility backend and frontend with API integration)
         return ResponseEntity.badRequest().body(errorResponse);
     }
 
@@ -99,6 +112,7 @@ public class GlobalExceptionHandler {
                 .error("Constraint Violation")
                 .message("Invalid request parameters")
                 .path(request.getRequestURI())
+                .timestamp(LocalDateTime.now())
                 .build();
 
         log.warn("Constraint violation on {}", request.getRequestURI());
@@ -119,6 +133,7 @@ public class GlobalExceptionHandler {
                 .error("Authentication Failed")
                 .message("Invalid credentials or authentication token")
                 .path(request.getRequestURI())
+                .timestamp(LocalDateTime.now())
                 .build();
 
         log.warn("Authentication failed on {}", request.getRequestURI());
@@ -139,6 +154,7 @@ public class GlobalExceptionHandler {
                 .error("Invalid Token")
                 .message("The provided token is invalid or expired")
                 .path(request.getRequestURI())
+                .timestamp(LocalDateTime.now())
                 .build();
 
         log.warn("JWT error on {}: {}", request.getRequestURI(), ex.getMessage());
@@ -159,6 +175,7 @@ public class GlobalExceptionHandler {
                 .error("Access Denied")
                 .message("You do not have permission to access this resource")
                 .path(request.getRequestURI())
+                .timestamp(LocalDateTime.now())
                 .build();
 
         log.warn("Access denied on {}", request.getRequestURI());
@@ -179,6 +196,7 @@ public class GlobalExceptionHandler {
                 .error("Bad Request")
                 .message(ex.getMessage())
                 .path(request.getRequestURI())
+                .timestamp(LocalDateTime.now())
                 .build();
 
         log.warn("Illegal argument on {}: {}", request.getRequestURI(), ex.getMessage());
@@ -187,6 +205,7 @@ public class GlobalExceptionHandler {
     }
 
     /**
+<<<<<<< HEAD
      * Handle illegal state exceptions (e.g. storage configuration or external service failures).
      */
     @ExceptionHandler(IllegalStateException.class)
@@ -215,10 +234,18 @@ public class GlobalExceptionHandler {
     })
     public ResponseEntity<ErrorResponse> handleNoResourceFoundException(
             Exception ex,
+=======
+     * Handle facility not found exceptions
+     */
+    @ExceptionHandler(FacilityNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleFacilityNotFoundException(
+            FacilityNotFoundException ex,
+>>>>>>> c3332a4 (Module A: Completed Facility backend and frontend with API integration)
             HttpServletRequest request
     ) {
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .status(HttpStatus.NOT_FOUND.value())
+<<<<<<< HEAD
                 .error("Not Found")
                 .message("The requested endpoint or resource does not exist")
                 .path(request.getRequestURI())
@@ -232,6 +259,43 @@ public class GlobalExceptionHandler {
     /**
      * Handle all other exceptions.
      * CRITICAL: Never expose stack traces or internal details to client.
+=======
+                .error("Facility Not Found")
+                .message(ex.getMessage())
+                .path(request.getRequestURI())
+                .timestamp(LocalDateTime.now())
+                .build();
+        
+        log.warn("Facility not found on {}: {}", request.getRequestURI(), ex.getMessage());
+        
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+    }
+    
+    /**
+     * Handle duplicate facility exceptions
+     */
+    @ExceptionHandler(DuplicateFacilityException.class)
+    public ResponseEntity<ErrorResponse> handleDuplicateFacilityException(
+            DuplicateFacilityException ex,
+            HttpServletRequest request
+    ) {
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .status(HttpStatus.CONFLICT.value())
+                .error("Duplicate Facility")
+                .message(ex.getMessage())
+                .path(request.getRequestURI())
+                .timestamp(LocalDateTime.now())
+                .build();
+        
+        log.warn("Duplicate facility on {}: {}", request.getRequestURI(), ex.getMessage());
+        
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
+    }
+    
+    /**
+     * Handle all other exceptions
+     * CRITICAL: Never expose stack traces or internal details to client
+>>>>>>> c3332a4 (Module A: Completed Facility backend and frontend with API integration)
      */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGenericException(
@@ -243,6 +307,7 @@ public class GlobalExceptionHandler {
                 .error("Internal Server Error")
                 .message("An unexpected error occurred. Please try again later.")
                 .path(request.getRequestURI())
+                .timestamp(LocalDateTime.now())
                 .build();
 
         log.error("Unexpected error on {}", request.getRequestURI(), ex);
