@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { getRolesFromToken } from '../utils/jwtUtils';
 
 export const OAuthCallback = () => {
   const [searchParams] = useSearchParams();
@@ -17,7 +18,19 @@ export const OAuthCallback = () => {
 
     if (token) {
       login(token);
-      navigate('/dashboard', { replace: true });
+      
+      // Redirect based on user role from JWT token
+      const roles = getRolesFromToken(token);
+      
+      if (roles.includes('ADMIN')) {
+        navigate('/dashboard/admin', { replace: true });
+      } else if (roles.includes('STAFF')) {
+        navigate('/dashboard/staff', { replace: true });
+      } else if (roles.includes('STUDENT')) {
+        navigate('/dashboard/student', { replace: true });
+      } else {
+        navigate('/dashboard', { replace: true });
+      }
     } else {
       setTimeout(() => navigate('/login', { replace: true }), 3000);
     }

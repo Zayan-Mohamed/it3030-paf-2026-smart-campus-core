@@ -1,0 +1,115 @@
+package com.smartcampus.api.controller;
+
+import com.smartcampus.api.dto.AdminDashboardResponse;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.bind.annotation.*;
+
+/**
+ * REST Controller for Admin Dashboard operations.
+ * 
+ * SECURITY:
+ * - All endpoints require authentication (JWT)
+ * - Access restricted to users with ADMIN role ONLY
+ * - Uses @PreAuthorize for method-level security
+ * 
+ * Spring Security automatically adds "ROLE_" prefix to roles from the JWT.
+ * So hasRole('ADMIN') checks for "ROLE_ADMIN" in the JWT.
+ */
+@Slf4j
+@RestController
+@RequestMapping("/api/v1/dashboard/admin")
+@RequiredArgsConstructor
+@CrossOrigin(origins = {"http://localhost:5173", "http://localhost:3000", "http://localhost:5174"})
+public class AdminDashboardController {
+    
+    /**
+     * Get admin dashboard welcome data.
+     * 
+     * SECURITY: Requires ADMIN role ONLY
+     * 
+     * @param userDetails The authenticated user's details (injected by Spring Security)
+     * @return AdminDashboardResponse with welcome message and system statistics
+     */
+    @GetMapping("/welcome")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<AdminDashboardResponse> getWelcomeData(
+            @AuthenticationPrincipal UserDetails userDetails
+    ) {
+        log.info("Admin dashboard welcome request from user: {}", userDetails.getUsername());
+        
+        // Build response with sample data
+        // TODO: Replace with actual data from services
+        AdminDashboardResponse response = AdminDashboardResponse.builder()
+                .message("Welcome Admin!")
+                .adminName(userDetails.getUsername())
+                .totalUsers(0)
+                .activeBookings(0)
+                .openIncidents(0)
+                .totalFacilities(0)
+                .build();
+        
+        return ResponseEntity.ok(response);
+    }
+    
+    /**
+     * Get system-wide statistics.
+     * 
+     * SECURITY: Requires ADMIN role ONLY
+     * 
+     * @param userDetails The authenticated user's details
+     * @return System statistics
+     */
+    @GetMapping("/statistics")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<String> getSystemStatistics(
+            @AuthenticationPrincipal UserDetails userDetails
+    ) {
+        log.info("System statistics request from admin: {}", userDetails.getUsername());
+        
+        // TODO: Implement actual statistics logic
+        return ResponseEntity.ok("System statistics - accessible only to admins");
+    }
+    
+    /**
+     * Get all users in the system (admin function).
+     * 
+     * SECURITY: Requires ADMIN role ONLY
+     * 
+     * @param userDetails The authenticated user's details
+     * @return List of all users
+     */
+    @GetMapping("/users/all")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<String> getAllUsers(
+            @AuthenticationPrincipal UserDetails userDetails
+    ) {
+        log.info("Get all users request from admin: {}", userDetails.getUsername());
+        
+        // TODO: Implement actual user retrieval logic
+        return ResponseEntity.ok("All users - admin access only");
+    }
+    
+    /**
+     * Get system audit logs (admin function).
+     * 
+     * SECURITY: Requires ADMIN role ONLY
+     * 
+     * @param userDetails The authenticated user's details
+     * @return System audit logs
+     */
+    @GetMapping("/audit/logs")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<String> getAuditLogs(
+            @AuthenticationPrincipal UserDetails userDetails
+    ) {
+        log.info("Audit logs request from admin: {}", userDetails.getUsername());
+        
+        // TODO: Implement actual audit log retrieval
+        return ResponseEntity.ok("Audit logs - admin access only");
+    }
+}
