@@ -31,7 +31,7 @@ const FacilityListPage = () => {
       setFacilities(data || []);
       setFilteredFacilities(data || []);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load facilities");
+      setError(err?.message || "Failed to load facilities");
     } finally {
       setLoading(false);
     }
@@ -41,44 +41,39 @@ const FacilityListPage = () => {
     fetchFacilities();
   }, []);
 
-  // Update filteredFacilities whenever filters change
   useEffect(() => {
     let filtered = [...facilities];
 
-    // Filter by name (case-insensitive contains)
     if (filters.name) {
-      filtered = filtered.filter(facility =>
-        facility.name.toLowerCase().includes(filters.name.toLowerCase())
+      filtered = filtered.filter((facility) =>
+        (facility.name || "").toLowerCase().includes(filters.name.toLowerCase())
       );
     }
 
-    // Filter by location (case-insensitive contains)
     if (filters.location) {
-      filtered = filtered.filter(facility =>
-        facility.location.toLowerCase().includes(filters.location.toLowerCase())
+      filtered = filtered.filter((facility) =>
+        (facility.location || "").toLowerCase().includes(filters.location.toLowerCase())
       );
     }
 
-    // Filter by facilityType (exact match)
     if (filters.facilityType) {
-      filtered = filtered.filter(facility =>
+      filtered = filtered.filter((facility) =>
         facility.facilityType === filters.facilityType
       );
     }
 
-    // Filter by status (exact match)
     if (filters.status) {
-      filtered = filtered.filter(facility =>
+      filtered = filtered.filter((facility) =>
         facility.status === filters.status
       );
     }
 
-    // Filter by minCapacity (>=)
     if (filters.minCapacity) {
-      const minCapacity = parseInt(filters.minCapacity);
+      const minCapacity = parseInt(filters.minCapacity, 10);
+
       if (!isNaN(minCapacity)) {
-        filtered = filtered.filter(facility =>
-          facility.capacity >= minCapacity
+        filtered = filtered.filter((facility) =>
+          Number(facility.capacity || 0) >= minCapacity
         );
       }
     }
@@ -87,7 +82,7 @@ const FacilityListPage = () => {
   }, [facilities, filters]);
 
   const handleFilterChange = (field, value) => {
-    setFilters(prev => ({
+    setFilters((prev) => ({
       ...prev,
       [field]: value
     }));
@@ -126,9 +121,9 @@ const FacilityListPage = () => {
         );
       }
 
-      setFacilities(prev => prev.filter(facility => facility.id !== id));
+      setFacilities((prev) => prev.filter((facility) => facility.id !== id));
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to delete facility");
+      setError(err?.message || "Failed to delete facility");
     }
   };
 
@@ -140,12 +135,13 @@ const FacilityListPage = () => {
     <div className="page-container">
       <div className="header">
         <h1>Facilities & Assets</h1>
-        <button onClick={handleAdd} className="btn">
+        <button onClick={handleAdd} className="btn btn-primary">
           Add Facility
         </button>
       </div>
 
       {error && <div className="error-message">{error}</div>}
+
       <FacilityFilterBar
         filters={filters}
         onChange={handleFilterChange}
