@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { Navigate, Link } from 'react-router-dom';
 
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8080').replace(/\/$/, '');
+
 export const Signup = () => {
   const { user, login } = useAuth();
   const [formData, setFormData] = useState({ name: '', email: '', password: '' });
@@ -18,22 +20,24 @@ export const Signup = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+
     try {
-      const response = await fetch('http://localhost:8080/api/v1/auth/signup', {
+      const response = await fetch(`${API_BASE_URL}/api/v1/auth/signup`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
       });
 
-      const data = await response.json();
+      const data = await response.json().catch(() => null) as { token?: string; message?: string } | null;
 
-      if (response.ok) {
+      if (response.ok && data?.token) {
         login(data.token);
       } else {
-        setError(data.message || 'Signup failed');
+        setError(data?.message || `Signup failed (HTTP ${response.status})`);
       }
-    } catch {
-      setError('Network error');
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Unknown network error';
+      setError(`Network error: ${message}. Check backend at ${API_BASE_URL}.`);
     }
   };
 

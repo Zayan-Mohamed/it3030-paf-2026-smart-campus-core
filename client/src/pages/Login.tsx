@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { Navigate, Link } from 'react-router-dom';
 
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8080').replace(/\/$/, '');
+
 export const Login = () => {
   const { user, login } = useAuth();
   const [formData, setFormData] = useState({ email: '', password: '' });
@@ -12,7 +14,7 @@ export const Login = () => {
   }
 
   const handleGoogleLogin = () => {
-    window.location.href = 'http://localhost:8080/oauth2/authorize/google';
+    window.location.href = `${API_BASE_URL}/oauth2/authorization/google`;
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -22,22 +24,24 @@ export const Login = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+
     try {
-      const response = await fetch('http://localhost:8080/api/v1/auth/login', {
+      const response = await fetch(`${API_BASE_URL}/api/v1/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
       });
 
-      const data = await response.json();
+      const data = await response.json().catch(() => null) as { token?: string; message?: string } | null;
 
-      if (response.ok) {
+      if (response.ok && data?.token) {
         login(data.token);
       } else {
-        setError(data.message || 'Login failed');
+        setError(data?.message || `Login failed (HTTP ${response.status})`);
       }
-    } catch {
-      setError('Network error');
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Unknown network error';
+      setError(`Network error: ${message}. Check backend at ${API_BASE_URL}.`);
     }
   };
 
