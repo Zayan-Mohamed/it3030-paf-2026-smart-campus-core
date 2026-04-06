@@ -158,6 +158,29 @@ public class GlobalExceptionHandler {
     }
     
     /**
+     * Handle resource not found exceptions (404)
+     */
+    @ExceptionHandler({
+            org.springframework.web.servlet.resource.NoResourceFoundException.class,
+            org.springframework.web.servlet.NoHandlerFoundException.class
+    })
+    public ResponseEntity<ErrorResponse> handleNoResourceFoundException(
+            Exception ex,
+            HttpServletRequest request
+    ) {
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .status(HttpStatus.NOT_FOUND.value())
+                .error("Not Found")
+                .message("The requested endpoint or resource does not exist")
+                .path(request.getRequestURI())
+                .build();
+        
+        log.warn("Resource not found: {}", request.getRequestURI());
+        
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+    }
+    
+    /**
      * Handle all other exceptions
      * CRITICAL: Never expose stack traces or internal details to client
      */
