@@ -31,7 +31,7 @@ export const Login = () => {
   }
 
   const handleGoogleLogin = () => {
-    window.location.href = `${API_BASE_URL}/oauth2/authorize/google`;
+    window.location.href = `${API_BASE_URL}/oauth2/authorization/google`;
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {

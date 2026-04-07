@@ -46,7 +46,7 @@ public class DataInitializer {
                         .enabled(true)
                         .build();
                 userRepository.save(admin);
-                log.info("Created ADMIN user: admin@smartcampus.edu (password: admin123)");
+                log.info("Created ADMIN user: admin@smartcampus.edu");
             } else {
                 log.info("ADMIN user already exists: admin@smartcampus.edu");
             }
@@ -62,7 +62,7 @@ public class DataInitializer {
                         .enabled(true)
                         .build();
                 userRepository.save(staff);
-                log.info("Created STAFF user: staff@smartcampus.edu (password: staff123)");
+                log.info("Created STAFF user: staff@smartcampus.edu");
             } else {
                 log.info("STAFF user already exists: staff@smartcampus.edu");
             }
@@ -78,16 +78,12 @@ public class DataInitializer {
                         .enabled(true)
                         .build();
                 userRepository.save(student);
-                log.info("Created STUDENT user: student@smartcampus.edu (password: student123)");
+                log.info("Created STUDENT user: student@smartcampus.edu");
             } else {
                 log.info("STUDENT user already exists: student@smartcampus.edu");
             }
 
             log.info("Data initialization complete!");
-            log.info("Test Credentials:");
-            log.info("   ADMIN:   admin@smartcampus.edu / admin123");
-            log.info("   STAFF:   staff@smartcampus.edu / staff123");
-            log.info("   STUDENT: student@smartcampus.edu / student123");
         };
     }
 }

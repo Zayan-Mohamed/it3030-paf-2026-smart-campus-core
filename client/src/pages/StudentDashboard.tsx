@@ -27,21 +27,16 @@ export const StudentDashboard = () => {
     navigate('/login');
   };
 
+  // TODO: Fetch real stats from API
   const stats = [
-    { title: 'Active Bookings', value: '3', icon: Calendar, color: '#3b82f6', change: '+2 this week' },
-    { title: 'Open Incidents', value: '1', icon: AlertTriangle, color: '#f59e0b', change: 'Pending review' },
-    { title: 'Available Facilities', value: '12', icon: Building2, color: '#10b981', change: 'Book now' },
-    { title: 'Campus Events', value: '5', icon: PartyPopper, color: '#8b5cf6', change: 'This month' },
-  ];
-
-  const recentBookings = [
-    { facility: 'Library Study Room A', date: 'Today, 2:00 PM', status: 'Confirmed', color: '#10b981' },
-    { facility: 'Computer Lab 3', date: 'Tomorrow, 10:00 AM', status: 'Confirmed', color: '#10b981' },
-    { facility: 'Sports Complex', date: 'Jan 15, 4:00 PM', status: 'Pending', color: '#f59e0b' },
+    { title: 'Active Bookings', value: '0', icon: Calendar, color: '#0891b2', change: 'Loading...' },
+    { title: 'Open Incidents', value: '0', icon: AlertTriangle, color: '#f59e0b', change: 'Loading...' },
+    { title: 'Available Facilities', value: '0', icon: Building2, color: '#10b981', change: 'Loading...' },
+    { title: 'Campus Events', value: '0', icon: PartyPopper, color: '#8b5cf6', change: 'Loading...' },
   ];
 
   const quickActions = [
-    { title: 'Book Facility', icon: Building2, desc: 'Reserve study rooms, labs, and more', color: '#3b82f6' },
+    { title: 'Book Facility', icon: Building2, desc: 'Reserve study rooms, labs, and more', color: '#0891b2' },
     { title: 'Report Issue', icon: FileText, desc: 'Submit maintenance requests', color: '#f59e0b' },
     { title: 'Campus Map', icon: Map, desc: 'Navigate campus buildings', color: '#10b981' },
     { title: 'My Profile', icon: User, desc: 'Update your information', color: '#8b5cf6' },
@@ -154,18 +149,19 @@ export const StudentDashboard = () => {
         <section className="section">
           <h2 className="section-title">Recent Bookings</h2>
           <div className="bookings-list">
-            {recentBookings.map((booking, index) => (
-              <div key={index} className="booking-item" style={{ animationDelay: `${index * 0.1}s` }}>
-                <div className="booking-icon"><Building2 size={24} /></div>
-                <div className="booking-details">
-                  <h4 className="booking-facility">{booking.facility}</h4>
-                  <p className="booking-date">{booking.date}</p>
-                </div>
-                <span className="booking-status" style={{ background: `${booking.color}20`, color: booking.color }}>
-                  {booking.status}
-                </span>
+            <div className="booking-item" style={{ 
+              justifyContent: 'center', 
+              textAlign: 'center', 
+              padding: '3rem 2rem',
+              flexDirection: 'column',
+              gap: '1rem'
+            }}>
+              <Building2 size={48} style={{ color: '#94a3b8', margin: '0 auto' }} />
+              <div>
+                <h4 className="booking-facility" style={{ color: '#64748b' }}>No Bookings Yet</h4>
+                <p className="booking-date">Your facility bookings will appear here</p>
               </div>
-            ))}
+            </div>
           </div>
         </section>
 
