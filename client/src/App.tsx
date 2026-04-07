@@ -31,18 +31,39 @@ function App() {
       <AuthProvider>
         <div className="min-h-screen">
           <Navbar />
-          <main className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
-            <Routes>
-              {/* Public Routes */}
+          <Routes>
+              {/* Public Routes with constrained width */}
               <Route path="/" element={<Navigate to="/dashboard" replace />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/signup" element={<Signup />} />
-              <Route path="/auth/callback" element={<OAuthCallback />} />
-                <Route element={<ProtectedRoute allowedRoles={['STUDENT', 'STAFF', 'ADMIN']} />}>
-                <Route path="/incidents/new" element={<NewIncident />} />
+              <Route path="/login" element={
+                <main className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
+                  <Login />
+                </main>
+              } />
+              <Route path="/signup" element={
+                <main className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
+                  <Signup />
+                </main>
+              } />
+              <Route path="/auth/callback" element={
+                <main className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
+                  <OAuthCallback />
+                </main>
+              } />
+              
+              <Route path="/unauthorized" element={
+                <main className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
+                  <Unauthorized />
+                </main>
+              } />
+              
+              {/* Protected incident routes with constrained width */}
+              <Route element={<ProtectedRoute allowedRoles={['STUDENT', 'STAFF', 'ADMIN']} />}>
+                <Route path="/incidents/new" element={
+                  <main className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
+                    <NewIncident />
+                  </main>
+                } />
               </Route>
-
-              <Route path="/unauthorized" element={<Unauthorized />} />
               
               {/* Smart redirect to role-appropriate dashboard */}
               <Route path="/dashboard" element={<DashboardRedirect />} />
@@ -63,7 +84,6 @@ function App() {
               {/* Catch-all route */}
               <Route path="*" element={<Navigate to="/dashboard" replace />} />
             </Routes>
-          </main>
         </div>
       </AuthProvider>
     </BrowserRouter>

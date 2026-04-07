@@ -28,25 +28,12 @@ export const StaffDashboard = () => {
     navigate('/login');
   };
 
+  // TODO: Fetch real stats from API
   const stats = [
-    { title: 'Pending Incidents', value: '8', icon: AlertTriangle, color: '#f59e0b', change: '+3 today' },
-    { title: 'Assigned Tasks', value: '12', icon: Clipboard, color: '#3b82f6', change: '4 due today' },
-    { title: 'Completed Today', value: '15', icon: CheckCircle, color: '#10b981', change: '↑ 25% vs yesterday' },
-    { title: 'Avg Response Time', value: '2.5h', icon: Clock, color: '#8b5cf6', change: '↓ 15% improvement' },
-  ];
-
-  const incidentQueue = [
-    { id: 'INC-1234', title: 'Library AC Not Working', location: 'Main Library - 3rd Floor', priority: 'High', time: '15 min ago', color: '#ef4444' },
-    { title: 'Broken Chair in Classroom', location: 'Building A - Room 301', priority: 'Medium', time: '1 hour ago', color: '#f59e0b' },
-    { title: 'WiFi Connection Issues', location: 'Student Center', priority: 'High', time: '2 hours ago', color: '#ef4444' },
-    { title: 'Lighting Problem', location: 'Engineering Block - Lab 5', priority: 'Low', time: '3 hours ago', color: '#10b981' },
-  ];
-
-  const todaySchedule = [
-    { time: '09:00 AM', task: 'Inspect HVAC System - Science Building', status: 'Completed' },
-    { time: '11:00 AM', task: 'Fix Projector - Lecture Hall 2', status: 'In Progress' },
-    { time: '02:00 PM', task: 'Maintenance Check - Sports Complex', status: 'Upcoming' },
-    { time: '04:00 PM', task: 'Resolve Network Issues - IT Lab', status: 'Upcoming' },
+    { title: 'Pending Incidents', value: '0', icon: AlertTriangle, color: '#f59e0b', change: 'Loading...' },
+    { title: 'Assigned Tasks', value: '0', icon: Clipboard, color: '#0891b2', change: 'Loading...' },
+    { title: 'Completed Today', value: '0', icon: CheckCircle, color: '#10b981', change: 'Loading...' },
+    { title: 'Avg Response Time', value: '-', icon: Clock, color: '#8b5cf6', change: 'Loading...' },
   ];
 
   return (
@@ -138,18 +125,19 @@ export const StaffDashboard = () => {
           <section className="section">
             <h2 className="section-title">Incident Queue</h2>
             <div className="bookings-list">
-              {incidentQueue.map((incident, index) => (
-                <div key={index} className="booking-item" style={{ animationDelay: `${index * 0.1}s` }}>
-                  <div className="booking-icon"><AlertTriangle size={24} /></div>
-                  <div className="booking-details">
-                    <h4 className="booking-facility">{incident.title}</h4>
-                    <p className="booking-date">{incident.location} • {incident.time}</p>
-                  </div>
-                  <span className="booking-status" style={{ background: `${incident.color}20`, color: incident.color }}>
-                    {incident.priority}
-                  </span>
+              <div className="booking-item" style={{ 
+                justifyContent: 'center', 
+                textAlign: 'center', 
+                padding: '3rem 2rem',
+                flexDirection: 'column',
+                gap: '1rem'
+              }}>
+                <AlertTriangle size={48} style={{ color: '#94a3b8', margin: '0 auto' }} />
+                <div>
+                  <h4 className="booking-facility" style={{ color: '#64748b' }}>No Pending Incidents</h4>
+                  <p className="booking-date">Assigned incidents will appear here</p>
                 </div>
-              ))}
+              </div>
             </div>
           </section>
 
@@ -157,26 +145,19 @@ export const StaffDashboard = () => {
           <section className="section">
             <h2 className="section-title">Today's Schedule</h2>
             <div className="bookings-list">
-              {todaySchedule.map((item, index) => (
-                <div key={index} className="booking-item" style={{ animationDelay: `${index * 0.1}s` }}>
-                  <div className="booking-icon"><Clock size={24} /></div>
-                  <div className="booking-details">
-                    <h4 className="booking-facility">{item.task}</h4>
-                    <p className="booking-date">{item.time}</p>
-                  </div>
-                  <span 
-                    className="booking-status" 
-                    style={{ 
-                      background: item.status === 'Completed' ? '#10b98120' : 
-                                 item.status === 'In Progress' ? '#3b82f620' : '#94a3b820',
-                      color: item.status === 'Completed' ? '#10b981' : 
-                            item.status === 'In Progress' ? '#3b82f6' : '#94a3b8'
-                    }}
-                  >
-                    {item.status}
-                  </span>
+              <div className="booking-item" style={{ 
+                justifyContent: 'center', 
+                textAlign: 'center', 
+                padding: '3rem 2rem',
+                flexDirection: 'column',
+                gap: '1rem'
+              }}>
+                <Clock size={48} style={{ color: '#94a3b8', margin: '0 auto' }} />
+                <div>
+                  <h4 className="booking-facility" style={{ color: '#64748b' }}>No Tasks Scheduled</h4>
+                  <p className="booking-date">Your daily tasks will appear here</p>
                 </div>
-              ))}
+              </div>
             </div>
           </section>
         </div>

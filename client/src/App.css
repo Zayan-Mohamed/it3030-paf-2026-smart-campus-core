@@ -1,10 +1,14 @@
 :root {
-  --primary-color: #0f172a;
-  --primary-hover: #1e293b;
+  --primary-color: #0891b2;
+  --primary-hover: #0e7490;
+  --primary-dark: #155e75;
   --surface-color: rgba(255, 255, 255, 0.92);
   --text-primary: #0f172a;
   --text-secondary: #64748b;
   --border-color: rgba(148, 163, 184, 0.26);
+  --danger-color: #dc2626;
+  --accent-color: #0369a1;
+  --radius-md: 0.7rem;
 }
 
 /* Login Page */
@@ -130,8 +134,8 @@
 
 .auth-form input:focus {
   outline: none;
-  border-color: #0369a1;
-  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(8, 145, 178, 0.15);
 }
 
 .btn-primary {
@@ -144,12 +148,39 @@
   font-weight: 600;
   letter-spacing: 0.01em;
   cursor: pointer;
-  transition: transform 0.2s ease, background-color 0.2s ease;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(8, 145, 178, 0.25);
 }
 
 .btn-primary:hover {
-  background-color: var(--primary-hover);
+  background: linear-gradient(135deg, var(--primary-hover) 0%, var(--primary-color) 100%);
   transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(8, 145, 178, 0.35);
+}
+
+.google-btn {
+  padding: 0.875rem 1.5rem;
+  background: white;
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 0.7rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.google-btn:hover {
+  background: rgba(248, 250, 252, 0.9);
+  border-color: #cbd5e1;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .error-message {

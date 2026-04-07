@@ -31,28 +31,16 @@ export const AdminDashboard = () => {
     navigate('/login');
   };
 
+  // TODO: Fetch real stats from API
   const stats = [
-    { title: 'Total Users', value: '2,847', icon: Users, color: '#3b82f6', change: '+124 this month' },
-    { title: 'Active Incidents', value: '23', icon: AlertTriangle, color: '#f59e0b', change: '-5 from yesterday' },
-    { title: 'System Uptime', value: '99.9%', icon: Rocket, color: '#10b981', change: '30 days avg' },
-    { title: 'Total Bookings', value: '1,456', icon: Calendar, color: '#8b5cf6', change: '+18% vs last month' },
-  ];
-
-  const recentUsers = [
-    { name: 'John Smith', email: 'john.smith@campus.edu', role: 'Student', status: 'Active', joined: '2 days ago' },
-    { name: 'Sarah Johnson', email: 'sarah.j@campus.edu', role: 'Staff', status: 'Active', joined: '5 days ago' },
-    { name: 'Mike Wilson', email: 'mike.w@campus.edu', role: 'Student', status: 'Pending', joined: '1 week ago' },
-  ];
-
-  const systemMetrics = [
-    { label: 'API Response Time', value: '125ms', status: 'good' },
-    { label: 'Database Health', value: 'Optimal', status: 'good' },
-    { label: 'Storage Used', value: '67%', status: 'warning' },
-    { label: 'Active Sessions', value: '342', status: 'good' },
+    { title: 'Total Users', value: '0', icon: Users, color: '#0891b2', change: 'Loading...' },
+    { title: 'Active Incidents', value: '0', icon: AlertTriangle, color: '#f59e0b', change: 'Loading...' },
+    { title: 'System Uptime', value: '-', icon: Rocket, color: '#10b981', change: 'Loading...' },
+    { title: 'Total Bookings', value: '0', icon: Calendar, color: '#8b5cf6', change: 'Loading...' },
   ];
 
   const quickActions = [
-    { title: 'User Management', icon: Users, desc: 'Manage users and roles', color: '#3b82f6' },
+    { title: 'User Management', icon: Users, desc: 'Manage users and roles', color: '#0891b2' },
     { title: 'System Settings', icon: Settings, desc: 'Configure system parameters', color: '#8b5cf6' },
     { title: 'View Reports', icon: BarChart3, desc: 'Analytics and insights', color: '#10b981' },
     { title: 'Audit Logs', icon: Clipboard, desc: 'Security and activity logs', color: '#f59e0b' },
@@ -170,39 +158,19 @@ export const AdminDashboard = () => {
           <section className="section">
             <h2 className="section-title">Recent Users</h2>
             <div className="bookings-list">
-              {recentUsers.map((user, index) => (
-                <div key={index} className="booking-item" style={{ animationDelay: `${index * 0.1}s` }}>
-                  <div className="booking-icon"><User size={24} /></div>
-                  <div className="booking-details">
-                    <h4 className="booking-facility">{user.name}</h4>
-                    <p className="booking-date">{user.email} • {user.joined}</p>
-                  </div>
-                  <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                    <span 
-                      className="booking-status" 
-                      style={{ 
-                        background: user.role === 'Staff' ? '#3b82f620' : '#8b5cf620',
-                        color: user.role === 'Staff' ? '#3b82f6' : '#8b5cf6',
-                        fontSize: '0.75rem',
-                        padding: '0.375rem 0.75rem'
-                      }}
-                    >
-                      {user.role}
-                    </span>
-                    <span 
-                      className="booking-status" 
-                      style={{ 
-                        background: user.status === 'Active' ? '#10b98120' : '#f59e0b20',
-                        color: user.status === 'Active' ? '#10b981' : '#f59e0b',
-                        fontSize: '0.75rem',
-                        padding: '0.375rem 0.75rem'
-                      }}
-                    >
-                      {user.status}
-                    </span>
-                  </div>
+              <div className="booking-item" style={{ 
+                justifyContent: 'center', 
+                textAlign: 'center', 
+                padding: '3rem 2rem',
+                flexDirection: 'column',
+                gap: '1rem'
+              }}>
+                <User size={48} style={{ color: '#94a3b8', margin: '0 auto' }} />
+                <div>
+                  <h4 className="booking-facility" style={{ color: '#64748b' }}>No Users Yet</h4>
+                  <p className="booking-date">User registrations will appear here</p>
                 </div>
-              ))}
+              </div>
             </div>
           </section>
 
@@ -210,32 +178,19 @@ export const AdminDashboard = () => {
           <section className="section">
             <h2 className="section-title">System Health</h2>
             <div className="bookings-list">
-              {systemMetrics.map((metric, index) => (
-                <div key={index} className="booking-item" style={{ animationDelay: `${index * 0.1}s` }}>
-                  <div 
-                    className="booking-icon"
-                    style={{
-                      background: metric.status === 'good' ? '#10b98120' : '#f59e0b20',
-                      color: metric.status === 'good' ? '#10b981' : '#f59e0b'
-                    }}
-                  >
-                    {metric.status === 'good' ? <CheckCircle size={24} /> : <AlertTriangle size={24} />}
-                  </div>
-                  <div className="booking-details">
-                    <h4 className="booking-facility">{metric.label}</h4>
-                    <p className="booking-date">{metric.value}</p>
-                  </div>
-                  <span 
-                    className="booking-status" 
-                    style={{ 
-                      background: metric.status === 'good' ? '#10b98120' : '#f59e0b20',
-                      color: metric.status === 'good' ? '#10b981' : '#f59e0b'
-                    }}
-                  >
-                    {metric.status === 'good' ? 'Healthy' : 'Warning'}
-                  </span>
+              <div className="booking-item" style={{ 
+                justifyContent: 'center', 
+                textAlign: 'center', 
+                padding: '3rem 2rem',
+                flexDirection: 'column',
+                gap: '1rem'
+              }}>
+                <CheckCircle size={48} style={{ color: '#94a3b8', margin: '0 auto' }} />
+                <div>
+                  <h4 className="booking-facility" style={{ color: '#64748b' }}>No Metrics Available</h4>
+                  <p className="booking-date">System health metrics will appear here</p>
                 </div>
-              ))}
+              </div>
             </div>
           </section>
         </div>

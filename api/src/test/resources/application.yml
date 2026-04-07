@@ -1,12 +1,7 @@
 spring:
-  datasource:
-    url: jdbc:h2:mem:testdb
-    username: ${TEST_DB_USERNAME:sa}
-    password: ${TEST_DB_PASSWORD:password}
-    driver-class-name: org.h2.Driver
-
   jpa:
-    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: create-drop
 
   security:
     oauth2:
