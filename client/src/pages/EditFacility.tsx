@@ -1,6 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Facility, FacilityType, FacilityStatus, UpdateFacilityRequest } from '../types';
+import { FACILITY_STATUSES, FACILITY_TYPES } from '../types';
+import type { Facility, FacilityStatus, FacilityType } from '../types';
+
+type FacilityFormData = {
+  name: string;
+  description: string;
+  facilityType: FacilityType;
+  location: string;
+  capacity: number;
+  status: FacilityStatus;
+  imageUrl: string;
+  amenities: string;
+  availableFrom: string;
+  availableTo: string;
+};
+
+const formatLabel = (value: string) =>
+  value.replace('_', ' ').toLowerCase().replace(/\b\w/g, (letter) => letter.toUpperCase());
 
 const EditFacilityPage: React.FC = () => {
   const navigate = useNavigate();
@@ -10,13 +27,13 @@ const EditFacilityPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [facility, setFacility] = useState<Facility | null>(null);
 
-  const [formData, setFormData] = useState<UpdateFacilityRequest>({
+  const [formData, setFormData] = useState<FacilityFormData>({
     name: '',
     description: '',
-    facilityType: FacilityType.OTHER,
+    facilityType: 'OTHER',
     location: '',
     capacity: 1,
-    status: FacilityStatus.AVAILABLE,
+    status: 'AVAILABLE',
     imageUrl: '',
     amenities: '',
     availableFrom: '08:00',
@@ -165,9 +182,9 @@ const EditFacilityPage: React.FC = () => {
               onChange={handleInputChange}
               required
             >
-              {Object.values(FacilityType).map(type => (
+              {FACILITY_TYPES.map((type) => (
                 <option key={type} value={type}>
-                  {type.replace('_', ' ').toLowerCase().replace(/\b\w/g, l => l.toUpperCase())}
+                  {formatLabel(type)}
                 </option>
               ))}
             </select>
@@ -182,9 +199,9 @@ const EditFacilityPage: React.FC = () => {
               onChange={handleInputChange}
               required
             >
-              {Object.values(FacilityStatus).map(status => (
+              {FACILITY_STATUSES.map((status) => (
                 <option key={status} value={status}>
-                  {status.replace('_', ' ').toLowerCase().replace(/\b\w/g, l => l.toUpperCase())}
+                  {formatLabel(status)}
                 </option>
               ))}
             </select>
