@@ -10,6 +10,11 @@ type BookingPayload = {
   numberOfAttendees: number;
 };
 
+type ReviewBookingPayload = {
+  status: 'APPROVED' | 'REJECTED';
+  staffComments?: string;
+};
+
 type BookingFilters = {
   status?: BookingStatus | '';
   facilityId?: number | '';
@@ -45,7 +50,7 @@ function buildQuery(filters: Record<string, string | number | undefined>) {
 }
 
 export async function getFacilities(token: string) {
-  const response = await fetch(`${API_BASE_URL}/api/v1/facilities`, {
+  const response = await fetch(`${API_BASE_URL}/api/facilities`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
@@ -126,6 +131,16 @@ export async function cancelBooking(token: string, bookingId: number) {
   return parseJsonOrThrow<Booking>(response);
 }
 
+export async function reviewBooking(token: string, bookingId: number, payload: ReviewBookingPayload) {
+  const response = await fetch(`${API_BASE_URL}/api/v1/bookings/${bookingId}/review`, {
+    method: 'POST',
+    headers: buildHeaders(token),
+    body: JSON.stringify(payload),
+  });
+
+  return parseJsonOrThrow<Booking>(response);
+}
+
 export async function getBookingCalendar(
   token: string,
   facilityId: number | '',
@@ -195,6 +210,26 @@ export function toLocalDateTimeInputValue(value: string) {
 
 export function fromLocalDateTimeInputValue(value: string) {
   return value.length === 16 ? `${value}:00` : value;
+}
+
+export function getApprovedCancellationDeadline(reviewedAt?: string | null) {
+  if (!reviewedAt) {
+    return null;
+  }
+
+  const reviewedDate = new Date(reviewedAt);
+  reviewedDate.setHours(reviewedDate.getHours() + 2);
+  return reviewedDate.toISOString();
+}
+
+export function isApprovalCancellationWindowOpen(reviewedAt?: string | null) {
+  const deadline = getApprovedCancellationDeadline(reviewedAt);
+
+  if (!deadline) {
+    return false;
+  }
+
+  return new Date(deadline).getTime() >= Date.now();
 }
 
 export function bookingStatusLabel(status: BookingStatus) {

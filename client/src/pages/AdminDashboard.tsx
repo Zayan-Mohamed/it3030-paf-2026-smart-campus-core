@@ -40,6 +40,7 @@ export const AdminDashboard = () => {
   ];
 
   const quickActions = [
+    { title: 'Manage Bookings', icon: Calendar, desc: 'Approve, reject, and cancel booking requests', color: '#8b5cf6', link: '/dashboard/admin/bookings' },
     { title: 'User Management', icon: Users, desc: 'Manage users and roles', color: '#0891b2' },
     { title: 'System Settings', icon: Settings, desc: 'Configure system parameters', color: '#8b5cf6' },
     { title: 'View Reports', icon: BarChart3, desc: 'Analytics and insights', color: '#10b981' },
@@ -61,6 +62,10 @@ export const AdminDashboard = () => {
           <Link to="/dashboard/admin" className="nav-item active">
             <span className="nav-icon"><Home size={20} /></span>
             {sidebarOpen && <span>Dashboard</span>}
+          </Link>
+          <Link to="/dashboard/admin/bookings" className="nav-item">
+            <span className="nav-icon"><Calendar size={20} /></span>
+            {sidebarOpen && <span>Manage Bookings</span>}
           </Link>
           <Link to="/admin/users" className="nav-item">
             <span className="nav-icon"><Users size={20} /></span>
@@ -140,13 +145,27 @@ export const AdminDashboard = () => {
           <div className="actions-grid-modern">
             {quickActions.map((action, index) => {
               const IconComponent = action.icon;
-              return (
-                <div key={index} className="action-card" style={{ animationDelay: `${index * 0.1}s` }}>
+              const content = (
+                <div className="action-card" style={{ animationDelay: `${index * 0.1}s` }}>
                   <div className="action-icon" style={{ background: `${action.color}20`, color: action.color }}>
                     <IconComponent size={24} />
                   </div>
                   <h3 className="action-title">{action.title}</h3>
                   <p className="action-desc">{action.desc}</p>
+                </div>
+              );
+
+              if (action.link) {
+                return (
+                  <Link key={index} to={action.link}>
+                    {content}
+                  </Link>
+                );
+              }
+
+              return (
+                <div key={index}>
+                  {content}
                 </div>
               );
             })}

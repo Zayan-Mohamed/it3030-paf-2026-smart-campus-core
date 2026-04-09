@@ -14,6 +14,7 @@ import { DashboardRedirect } from './components/DashboardRedirect';
 import { Unauthorized } from './pages/Unauthorized';
 import { StudentDashboard } from './pages/StudentDashboard';
 import { AdminDashboard } from './pages/AdminDashboard';
+import { AdminBookingManagementPage } from './pages/AdminBookingManagementPage';
 import { StaffDashboard } from './pages/StaffDashboard';
 import FacilityList from './pages/FacilityList';
 import EditFacilityPage from './pages/EditFacilityPage';
@@ -90,6 +91,7 @@ function App() {
 
               <Route element={<ProtectedRoute allowedRoles={['ADMIN']} />}>
                 <Route path="/dashboard/admin" element={<AdminDashboard />} />
+                <Route path="/dashboard/admin/bookings" element={<AdminBookingManagementPage />} />
                 <Route path="/dashboard/admin/facilities" element={<FacilityList />} />
                 <Route path="/dashboard/admin/facilities/new" element={<AddFacilityPage />} />
                 <Route path="/dashboard/admin/facilities/:id/edit" element={<EditFacilityPage />} />

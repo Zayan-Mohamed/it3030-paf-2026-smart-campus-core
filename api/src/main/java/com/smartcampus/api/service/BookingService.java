@@ -22,6 +22,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class BookingService {
 
+    private static final long APPROVED_CANCELLATION_WINDOW_HOURS = 2;
+
     private static final EnumSet<Booking.BookingStatus> ACTIVE_CONFLICT_STATUSES = EnumSet.of(
             Booking.BookingStatus.PENDING,
             Booking.BookingStatus.APPROVED);
@@ -127,6 +129,12 @@ public class BookingService {
         }
         if (booking.getStatus() == Booking.BookingStatus.COMPLETED) {
             throw new IllegalArgumentException("Completed bookings cannot be cancelled");
+        }
+        if (booking.getStatus() != Booking.BookingStatus.APPROVED) {
+            throw new IllegalArgumentException("Only approved bookings can be cancelled");
+        }
+        if (!isWithinApprovedCancellationWindow(booking)) {
+            throw new IllegalArgumentException("Approved bookings can only be cancelled within 2 hours of approval");
         }
 
         booking.setStatus(Booking.BookingStatus.CANCELLED);
@@ -284,6 +292,14 @@ public class BookingService {
         return value.trim();
     }
 
+    private boolean isWithinApprovedCancellationWindow(Booking booking) {
+        if (booking.getReviewedAt() == null) {
+            return false;
+        }
+
+        return !LocalDateTime.now().isAfter(booking.getReviewedAt().plusHours(APPROVED_CANCELLATION_WINDOW_HOURS));
+    }
+
     private BookingResponse mapToResponse(Booking booking, User currentUser) {
         boolean owner = booking.getUser().getId().equals(currentUser.getId());
         boolean privileged = isPrivileged(currentUser);
@@ -294,8 +310,8 @@ public class BookingService {
                 && booking.getStatus() != Booking.BookingStatus.APPROVED
                 && booking.getStatus() != Booking.BookingStatus.COMPLETED;
         boolean canCancel = canManage
-                && booking.getStatus() != Booking.BookingStatus.CANCELLED
-                && booking.getStatus() != Booking.BookingStatus.COMPLETED;
+                && booking.getStatus() == Booking.BookingStatus.APPROVED
+                && isWithinApprovedCancellationWindow(booking);
 
         return BookingResponse.builder()
                 .id(booking.getId())
