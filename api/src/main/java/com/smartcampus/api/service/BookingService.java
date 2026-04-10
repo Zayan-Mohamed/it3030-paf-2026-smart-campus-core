@@ -322,6 +322,7 @@ public class BookingService {
                 .facilityCapacity(booking.getFacility().getCapacity())
                 .userId(booking.getUser().getId())
                 .userName(privileged ? booking.getUser().getName() : currentUser.getName())
+            .userEmail(privileged ? booking.getUser().getEmail() : currentUser.getEmail())
                 .startTime(booking.getStartTime())
                 .endTime(booking.getEndTime())
                 .purpose(booking.getPurpose())
