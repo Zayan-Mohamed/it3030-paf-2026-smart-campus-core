@@ -31,6 +31,9 @@ public class BookingResponse {
     private String staffComments;
     private String reviewedByName;
     private LocalDateTime reviewedAt;
+    private String adminCancelReason;
+    private String cancelledByName;
+    private LocalDateTime cancelledAt;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private boolean canEdit;

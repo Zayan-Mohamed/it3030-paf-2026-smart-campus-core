@@ -1,6 +1,7 @@
 package com.smartcampus.api.service;
 
 import com.smartcampus.api.dto.booking.BookingConflictResponse;
+import com.smartcampus.api.dto.booking.AdminCancelBookingRequest;
 import com.smartcampus.api.dto.booking.BookingResponse;
 import com.smartcampus.api.dto.booking.CreateBookingRequest;
 import com.smartcampus.api.dto.booking.ReviewBookingRequest;
@@ -131,6 +132,34 @@ public class BookingService {
 
         booking.setStatus(Booking.BookingStatus.CANCELLED);
         return mapToResponse(bookingRepository.save(booking), currentUser);
+    }
+
+    @Transactional
+    public BookingResponse adminCancelBooking(User admin, Long bookingId, AdminCancelBookingRequest request) {
+        Booking booking = getBookingEntity(bookingId);
+
+        if (!admin.hasRole(Role.ADMIN)) {
+            throw new IllegalArgumentException("Only admins can cancel approved bookings");
+        }
+        if (booking.getStatus() != Booking.BookingStatus.APPROVED) {
+            throw new IllegalArgumentException("Only approved bookings can be cancelled by admin");
+        }
+        if (booking.getReviewedAt() == null || booking.getReviewedAt().plusHours(2).isBefore(LocalDateTime.now())) {
+            throw new IllegalArgumentException("Approved bookings can only be cancelled within 2 hours of approval");
+        }
+
+        String reason = normalizeOptional(request.getReason());
+        if (reason == null) {
+            throw new IllegalArgumentException("Cancellation reason is required");
+        }
+
+        booking.setStatus(Booking.BookingStatus.CANCELLED);
+        booking.setAdminCancelReason(reason);
+        booking.setStaffComments(reason);
+        booking.setCancelledBy(admin);
+        booking.setCancelledAt(LocalDateTime.now());
+
+        return mapToResponse(bookingRepository.save(booking), admin);
     }
 
     @Transactional
@@ -314,6 +343,9 @@ public class BookingService {
                 .staffComments(booking.getStaffComments())
                 .reviewedByName(booking.getReviewedBy() != null ? booking.getReviewedBy().getName() : null)
                 .reviewedAt(booking.getReviewedAt())
+                .adminCancelReason(booking.getAdminCancelReason())
+                .cancelledByName(booking.getCancelledBy() != null ? booking.getCancelledBy().getName() : null)
+                .cancelledAt(booking.getCancelledAt())
                 .createdAt(booking.getCreatedAt())
                 .updatedAt(booking.getUpdatedAt())
                 .canEdit(canEdit)
