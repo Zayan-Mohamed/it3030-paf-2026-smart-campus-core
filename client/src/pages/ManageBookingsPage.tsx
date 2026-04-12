@@ -37,12 +37,27 @@ const bookingStatuses: Array<{ value: BookingStatus | ''; label: string }> = [
   { value: 'COMPLETED', label: 'Completed' },
 ];
 
+const toLocalDateKey = (value: string) => {
+  const date = new Date(value);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+const dateFilterLabel = (value: string) => {
+  const date = new Date(`${value}T00:00:00`);
+  return new Intl.DateTimeFormat('en-LK', { dateStyle: 'medium' }).format(date);
+};
+
 export const ManageBookingsPage = () => {
   const { token, user, logout } = useAuth();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [statusFilter, setStatusFilter] = useState<BookingStatus | ''>('');
+  const [bookedDateFilter, setBookedDateFilter] = useState('');
+  const [locationFilter, setLocationFilter] = useState('');
   const [loading, setLoading] = useState(true);
   const [actionId, setActionId] = useState<number | null>(null);
   const [reviewingId, setReviewingId] = useState<number | null>(null);
@@ -160,6 +175,24 @@ export const ManageBookingsPage = () => {
     }
   };
 
+  const bookedDateOptions = [...new Set(bookings.map((booking) => toLocalDateKey(booking.startTime)))].sort((first, second) => first.localeCompare(second));
+  const locationOptions = [...new Set(bookings.map((booking) => booking.facilityLocation))].sort((first, second) => first.localeCompare(second));
+
+  const filteredBookings = bookings.filter((booking) => {
+    const dateMatched = !bookedDateFilter || toLocalDateKey(booking.startTime) === bookedDateFilter;
+    const locationMatched = !locationFilter || booking.facilityLocation === locationFilter;
+    return dateMatched && locationMatched;
+  }).sort((first, second) => {
+    const firstUpdatedAt = new Date(first.updatedAt).getTime();
+    const secondUpdatedAt = new Date(second.updatedAt).getTime();
+
+    if (Number.isNaN(firstUpdatedAt) || Number.isNaN(secondUpdatedAt)) {
+      return new Date(second.createdAt).getTime() - new Date(first.createdAt).getTime();
+    }
+
+    return secondUpdatedAt - firstUpdatedAt;
+  });
+
   return (
     <div className="dashboard-layout">
       {/* Sidebar */}
@@ -228,7 +261,6 @@ export const ManageBookingsPage = () => {
           <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
             <div>
               <h1 className="text-3xl font-semibold tracking-tight text-slate-900">Manage Bookings</h1>
-              <p className="mt-2 text-sm text-slate-600">Review and approve student booking requests. Bookings follow the workflow: PENDING → APPROVED/REJECTED.</p>
             </div>
             <Button
               type="button"
@@ -249,15 +281,41 @@ export const ManageBookingsPage = () => {
               <CardDescription>Filter bookings by status to review them systematically.</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-2">
-                <label htmlFor="statusFilter" className="text-sm font-medium text-slate-700">Status</label>
-                <Select id="statusFilter" value={statusFilter} onChange={(event) => setStatusFilter(event.target.value as BookingStatus | '')}>
-                  {bookingStatuses.map((status) => (
-                    <option key={status.label} value={status.value}>
-                      {status.label}
-                    </option>
-                  ))}
-                </Select>
+              <div className="grid gap-4 md:grid-cols-3">
+                <div className="space-y-2">
+                  <label htmlFor="statusFilter" className="text-sm font-medium text-slate-700">Status</label>
+                  <Select id="statusFilter" value={statusFilter} onChange={(event) => setStatusFilter(event.target.value as BookingStatus | '')}>
+                    {bookingStatuses.map((status) => (
+                      <option key={status.label} value={status.value}>
+                        {status.label}
+                      </option>
+                    ))}
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <label htmlFor="bookedDateFilter" className="text-sm font-medium text-slate-700">Booked Date</label>
+                  <Select id="bookedDateFilter" value={bookedDateFilter} onChange={(event) => setBookedDateFilter(event.target.value)}>
+                    <option value="">All booked dates</option>
+                    {bookedDateOptions.map((dateValue) => (
+                      <option key={dateValue} value={dateValue}>
+                        {dateFilterLabel(dateValue)}
+                      </option>
+                    ))}
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <label htmlFor="locationFilter" className="text-sm font-medium text-slate-700">Location</label>
+                  <Select id="locationFilter" value={locationFilter} onChange={(event) => setLocationFilter(event.target.value)}>
+                    <option value="">All locations</option>
+                    {locationOptions.map((location) => (
+                      <option key={location} value={location}>
+                        {location}
+                      </option>
+                    ))}
+                  </Select>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -282,7 +340,7 @@ export const ManageBookingsPage = () => {
             <Card>
               <CardContent className="py-12 text-center text-sm text-slate-500">Loading bookings...</CardContent>
             </Card>
-          ) : bookings.length === 0 ? (
+          ) : filteredBookings.length === 0 ? (
             <Card>
               <CardContent className="py-12 text-center">
                 <p className="text-lg font-medium text-slate-900">No bookings found</p>
@@ -291,7 +349,7 @@ export const ManageBookingsPage = () => {
             </Card>
           ) : (
             <div className="grid gap-4">
-              {bookings.map((booking) => (
+              {filteredBookings.map((booking) => (
                 <Card key={booking.id} className="border-slate-200/80 shadow-lg shadow-slate-900/5">
                   <CardContent className="pt-6">
                     <div className="space-y-4">
