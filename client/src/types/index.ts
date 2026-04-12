@@ -27,6 +27,8 @@ export interface Facility {
   status: FacilityStatus;
   imageUrl?: string | null;
   amenities?: string | null;
+  availableFrom?: string | null;
+  availableTo?: string | null;
 }
 
 export type BookingStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | 'CANCELLED' | 'COMPLETED';

@@ -2,8 +2,7 @@ import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { Navigate, Link, useNavigate } from 'react-router-dom';
 import { getRolesFromToken, getStoredToken } from '../utils/jwtUtils';
-
-const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8080').replace(/\/$/, '');
+import { API_BASE_URL, getGoogleAuthUrl, loginRequest } from '../lib/authService';
 
 export const Login = () => {
   const { user, login } = useAuth();
@@ -31,7 +30,7 @@ export const Login = () => {
   }
 
   const handleGoogleLogin = () => {
-    window.location.href = `${API_BASE_URL}/oauth2/authorization/google`;
+    window.location.href = getGoogleAuthUrl();
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -43,15 +42,9 @@ export const Login = () => {
     setError(null);
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/v1/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
+      const data = await loginRequest(formData);
 
-      const data = await response.json().catch(() => null) as { token?: string; message?: string } | null;
-
-      if (response.ok && data?.token) {
+      if (data?.token) {
         login(data.token);
         
         // Redirect based on user role from JWT token
@@ -67,11 +60,11 @@ export const Login = () => {
           navigate('/dashboard', { replace: true });
         }
       } else {
-        setError(data?.message || `Login failed (HTTP ${response.status})`);
+        setError(data?.message || data?.error || 'Login failed');
       }
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Unknown network error';
-      setError(`Network error: ${message}. Check backend at ${API_BASE_URL}.`);
+      const message = err instanceof Error ? err.message : 'Login failed';
+      setError(message.includes('Failed to fetch') ? `Unable to reach backend at ${API_BASE_URL}.` : message);
     }
   };
 

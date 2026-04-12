@@ -15,6 +15,9 @@ import { Unauthorized } from './pages/Unauthorized';
 import { StudentDashboard } from './pages/StudentDashboard';
 import { AdminDashboard } from './pages/AdminDashboard';
 import { StaffDashboard } from './pages/StaffDashboard';
+import { FacilityList } from './pages/FacilityList';
+import { AddFacility } from './pages/AddFacility';
+import { EditFacility } from './pages/EditFacility';
 import './App.css';
 
 /**
@@ -87,6 +90,9 @@ function App() {
 
               <Route element={<ProtectedRoute allowedRoles={['ADMIN']} />}>
                 <Route path="/dashboard/admin" element={<AdminDashboard />} />
+                <Route path="/admin/facilities" element={<FacilityList />} />
+                <Route path="/admin/facilities/new" element={<AddFacility />} />
+                <Route path="/admin/facilities/:facilityId/edit" element={<EditFacility />} />
               </Route>
 
               <Route element={<ProtectedRoute allowedRoles={['STAFF', 'ADMIN']} />}>
