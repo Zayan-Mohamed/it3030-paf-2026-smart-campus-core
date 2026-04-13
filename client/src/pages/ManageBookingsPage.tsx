@@ -100,12 +100,17 @@ export const ManageBookingsPage = () => {
       return;
     }
 
+    const isReviewingCurrentBooking = reviewingId === bookingId;
+    const commentForBooking = isReviewingCurrentBooking ? reviewComment : '';
+
     try {
       setActionId(bookingId);
-      await reviewBooking(token, bookingId, 'APPROVED', reviewComment);
+      await reviewBooking(token, bookingId, 'APPROVED', commentForBooking);
       setSuccessMessage('Booking approved successfully.');
-      setReviewComment('');
-      setReviewingId(null);
+      if (isReviewingCurrentBooking) {
+        setReviewComment('');
+        setReviewingId(null);
+      }
       await loadBookings();
     } catch (actionError) {
       setError(actionError instanceof Error ? actionError.message : 'Failed to approve booking.');
