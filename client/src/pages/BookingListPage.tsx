@@ -1,19 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useNavigate } from 'react-router-dom';
 import {
   AlertCircle,
-  AlertTriangle,
-  Building2,
-  Calendar,
   CalendarDays,
-  ChevronLeft,
-  ChevronRight,
   Eye,
-  Home,
-  LogOut,
-  Map,
-  PartyPopper,
   Pencil,
   Plus,
   RefreshCw,
@@ -38,9 +28,7 @@ const bookingStatuses: Array<{ value: BookingStatus | ''; label: string }> = [
 ];
 
 export const BookingListPage = () => {
-  const { token, user, logout } = useAuth();
-  const navigate = useNavigate();
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const { token } = useAuth();
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [facilities, setFacilities] = useState<Facility[]>([]);
   const [statusFilter, setStatusFilter] = useState<BookingStatus | ''>('');
@@ -49,10 +37,6 @@ export const BookingListPage = () => {
   const [actionId, setActionId] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
-  };
 
   const loadData = async () => {
     if (!token) {

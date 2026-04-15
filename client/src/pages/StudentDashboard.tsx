@@ -1,31 +1,19 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { 
   Calendar, 
   AlertTriangle, 
   Building2, 
   PartyPopper, 
-  Home, 
   Map, 
   User, 
-  LogOut, 
   FileText, 
   Lightbulb,
-  ChevronLeft,
-  ChevronRight
 } from 'lucide-react';
 import '../styles/Dashboard.css';
 
 export const StudentDashboard = () => {
-  const { user, logout } = useAuth();
-  const navigate = useNavigate();
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
-  };
+  const { user } = useAuth();
 
   // TODO: Fetch real stats from API
   const stats = [

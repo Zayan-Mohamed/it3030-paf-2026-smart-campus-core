@@ -1,8 +1,7 @@
 import { Link, Navigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { 
-  Zap, Shield, Globe, ChevronRight, Cpu, Network, Sparkles, Building2, 
-  Map, Activity, Code2, MoveRight
+  Zap, Shield, Globe, ChevronRight, Cpu, Sparkles, Activity, Code2, MoveRight
 } from 'lucide-react';
 
 export const LandingPage = () => {

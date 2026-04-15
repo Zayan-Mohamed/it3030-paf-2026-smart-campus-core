@@ -3,16 +3,7 @@ import type { FormEvent } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import {
   AlertCircle,
-  AlertTriangle,
-  Building2,
-  Calendar,
   CalendarDays,
-  ChevronLeft,
-  ChevronRight,
-  Home,
-  LogOut,
-  Map,
-  PartyPopper,
   Save,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
@@ -80,11 +71,10 @@ async function fetchFacilities(token: string): Promise<Facility[]> {
 }
 
 export const BookingFormPage = () => {
-  const { token, user, logout } = useAuth();
+  const { token } = useAuth();
   const navigate = useNavigate();
   const { bookingId } = useParams<{ bookingId: string }>();
   const isEditMode = Boolean(bookingId);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [facilities, setFacilities] = useState<Facility[]>([]);
   const [form, setForm] = useState<FormState>(initialForm);
   const [loading, setLoading] = useState(true);
@@ -96,11 +86,6 @@ export const BookingFormPage = () => {
   const [selectedName, setSelectedName] = useState('');
   const [selectedType, setSelectedType] = useState('');
   const [selectedLocation, setSelectedLocation] = useState('');
-
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
-  };
 
   useEffect(() => {
     const loadPage = async () => {

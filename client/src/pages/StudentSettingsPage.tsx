@@ -58,8 +58,9 @@ export const StudentSettingsPage = () => {
       setUser(prev => prev ? { ...prev, ...updatedUser } : null);
       
       setMessage({ text: 'Profile picture removed successfully!', type: 'success' });
-    } catch (err: any) {
-      setMessage({ text: err.message || 'Failed to remove avatar', type: 'error' });
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to remove avatar';
+      setMessage({ text: message, type: 'error' });
     } finally {
       setLoading(false);
     }
@@ -77,8 +78,9 @@ export const StudentSettingsPage = () => {
       setFormData(prev => ({ ...prev, pictureUrl: publicUrl }));
       
       setMessage({ text: 'Avatar uploaded! Make sure to save your changes.', type: 'success' });
-    } catch (err: any) {
-      setMessage({ text: err.message || 'Failed to upload avatar', type: 'error' });
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to upload avatar';
+      setMessage({ text: message, type: 'error' });
     } finally {
       setLoading(false);
       if (fileInputRef.current) {
@@ -117,8 +119,9 @@ export const StudentSettingsPage = () => {
       setIsDeleting(true);
       await UserService.deleteUser(user.id);
       logout();
-    } catch (err: any) {
-      setMessage({ text: err.message || 'Failed to delete account', type: 'error' });
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to delete account';
+      setMessage({ text: message, type: 'error' });
       setShowDeleteConfirm(false);
       setIsDeleting(false);
     }

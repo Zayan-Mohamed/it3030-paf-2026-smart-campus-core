@@ -1,20 +1,8 @@
 import { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
 import {
   AlertCircle,
-  Building2,
-  Calendar,
   CheckCircle,
-  ChevronLeft,
-  ChevronRight,
   Clock3,
-  FileText,
-  Home,
-  LogOut,
-  Settings,
-  AlertTriangle,
-  BarChart3,
-  Users,
   RefreshCw,
   Check,
   X,
@@ -51,9 +39,7 @@ const dateFilterLabel = (value: string) => {
 };
 
 export const ManageBookingsPage = () => {
-  const { token, user, logout } = useAuth();
-  const navigate = useNavigate();
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const { token } = useAuth();
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [statusFilter, setStatusFilter] = useState<BookingStatus | ''>('');
   const [bookedDateFilter, setBookedDateFilter] = useState('');
@@ -67,10 +53,6 @@ export const ManageBookingsPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
-  };
 
   const loadBookings = async () => {
     if (!token) {

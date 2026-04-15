@@ -4,7 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { cn } from '../lib/utils';
 import {
   Home, Users, Building2, AlertTriangle, Calendar, BarChart3, Settings, FileText,
-  LogOut, ChevronLeft, ChevronRight, Map, PartyPopper, Wrench, LayoutDashboard
+  LogOut, ChevronLeft, ChevronRight, Map, PartyPopper, Wrench
 } from 'lucide-react';
 import '../styles/Dashboard.css';
 

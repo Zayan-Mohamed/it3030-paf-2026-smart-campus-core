@@ -93,6 +93,7 @@ export const Signup = () => {
         setError(data?.message || 'Invalid OTP code');
       }
     } catch (err) {
+      console.error('OTP verification failed:', err instanceof Error ? err.message : 'Unknown error');
       setError('Network error during verification.');
     } finally {
       setVerifying(false);
@@ -108,7 +109,10 @@ export const Signup = () => {
       });
       alert('OTP resent to your email.');
     } catch (err) {
+      console.error('Failed to resend OTP:', err instanceof Error ? err.message : 'Unknown error');
+      setError('Failed to resend OTP. Please try again.');
       alert('Failed to resend OTP.');
+      
     }
   };
 

@@ -2,17 +2,8 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import {
   AlertCircle,
-  AlertTriangle,
   ArrowLeft,
-  Building2,
-  Calendar,
   CalendarClock,
-  ChevronLeft,
-  ChevronRight,
-  Home,
-  LogOut,
-  Map,
-  PartyPopper,
   MapPin,
   Pencil,
   Trash2,
@@ -27,19 +18,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../co
 import '../styles/Dashboard.css';
 
 export const BookingDetailsPage = () => {
-  const { token, user, logout } = useAuth();
+  const { token } = useAuth();
   const navigate = useNavigate();
   const { bookingId } = useParams<{ bookingId: string }>();
   const [booking, setBooking] = useState<Booking | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
 
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
-  };
 
   const loadBooking = async () => {
     if (!token || !bookingId) {

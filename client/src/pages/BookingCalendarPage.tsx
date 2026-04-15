@@ -1,17 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useNavigate } from 'react-router-dom';
 import {
   AlertCircle,
-  AlertTriangle,
-  Building2,
-  Calendar,
   ChevronLeft,
   ChevronRight,
-  Home,
-  LogOut,
-  Map,
-  PartyPopper,
   Plus,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
@@ -42,20 +34,13 @@ function toIso(date: Date) {
 }
 
 export const BookingCalendarPage = () => {
-  const { token, user, logout } = useAuth();
-  const navigate = useNavigate();
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const { token } = useAuth();
   const [facilities, setFacilities] = useState<Facility[]>([]);
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [selectedFacility, setSelectedFacility] = useState<number | ''>('');
   const [weekStart, setWeekStart] = useState<Date>(() => startOfWeek(new Date()));
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
-  };
 
   const loadCalendar = async () => {
     if (!token) {

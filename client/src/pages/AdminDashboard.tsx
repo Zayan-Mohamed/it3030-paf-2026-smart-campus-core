@@ -1,36 +1,18 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
 import {
   Users,
   AlertTriangle,
   Rocket,
   Calendar,
-  Home,
-  Building2,
   BarChart3,
   Settings,
-  FileText,
   User,
   CheckCircle,
-  LogOut,
   Shield,
   Clipboard,
-  ChevronLeft,
-  ChevronRight
 } from 'lucide-react';
 import '../styles/Dashboard.css';
 
 export const AdminDashboard = () => {
-  const { user, logout } = useAuth();
-  const navigate = useNavigate();
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
-  };
-
   // TODO: Fetch real stats from API
   const stats = [
     { title: 'Total Users', value: '0', icon: Users, color: '#0891b2', change: 'Loading...' },
