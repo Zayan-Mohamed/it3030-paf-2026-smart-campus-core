@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { AlertTriangle, Clock3, MessageSquareText, ShieldCheck } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import type { Incident, IncidentPriority, IncidentStatus } from '../types';
@@ -68,37 +68,62 @@ export const IncidentTicketsPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchIncidents = async () => {
-      if (!token) {
-        setLoading(false);
-        return;
-      }
+  const fetchIncidents = useCallback(async (showLoader = true) => {
+    if (!token) {
+      setLoading(false);
+      return;
+    }
 
-      try {
+    try {
+      if (showLoader) {
         setLoading(true);
-        setError(null);
+      }
+      setError(null);
 
-        const response = await fetch(`${API_BASE_URL}/api/v1/incidents/my`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+      const response = await fetch(`${API_BASE_URL}/api/v1/incidents/my`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
-        if (!response.ok) {
-          const payload = (await response.json().catch(() => null)) as { message?: string } | null;
-          throw new Error(payload?.message ?? 'Failed to fetch your tickets');
-        }
+      if (!response.ok) {
+        const payload = (await response.json().catch(() => null)) as { message?: string } | null;
+        throw new Error(payload?.message ?? 'Failed to fetch your tickets');
+      }
 
-        const payload = (await response.json()) as Incident[];
-        setIncidents(payload);
-      } catch (fetchError) {
-        setError(fetchError instanceof Error ? fetchError.message : 'Failed to fetch your tickets');
-      } finally {
+      const payload = (await response.json()) as Incident[];
+      setIncidents(payload);
+    } catch (fetchError) {
+      setError(fetchError instanceof Error ? fetchError.message : 'Failed to fetch your tickets');
+    } finally {
+      if (showLoader) {
         setLoading(false);
       }
+    }
+  }, [token]);
+
+  useEffect(() => {
+    fetchIncidents(true);
+  }, [fetchIncidents]);
+
+  useEffect(() => {
+    if (!token) {
+      return;
+    }
+
+    const intervalId = window.setInterval(() => {
+      fetchIncidents(false);
+    }, 5000);
+
+    const handleWindowFocus = () => {
+      fetchIncidents(false);
     };
 
-    fetchIncidents();
-  }, [token]);
+    window.addEventListener('focus', handleWindowFocus);
+
+    return () => {
+      window.clearInterval(intervalId);
+      window.removeEventListener('focus', handleWindowFocus);
+    };
+  }, [fetchIncidents, token]);
 
   const counters = useMemo(() => {
     return {
