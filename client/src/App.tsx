@@ -6,6 +6,9 @@ import { Login } from './pages/Login';
 import { Signup } from './pages/Signup';
 import { OAuthCallback } from './pages/OAuthCallback';
 import { NewIncident } from './pages/NewIncident';
+import { IncidentTicketsPage } from './pages/IncidentTicketsPage';
+import { IncidentQueuePage } from './pages/IncidentQueuePage';
+import { AdminIncidentsPage } from './pages/AdminIncidentsPage';
 import { BookingListPage } from './pages/BookingListPage';
 import { BookingDetailsPage } from './pages/BookingDetailsPage';
 import { BookingFormPage } from './pages/BookingFormPage';
@@ -72,8 +75,20 @@ function App() {
 
               {/* Protected incident routes */}
               <Route element={<ProtectedRoute allowedRoles={['STUDENT', 'STAFF', 'ADMIN']} />}>
-                <Route path="/incidents/new" element={<NewIncident />} />
+ticket-flow
+                <Route path="/incidents/new" element={
+                  <main className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
+                    <NewIncident />
+                  </main>
+                } />
+                <Route path="/incidents" element={
+                  <main className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
+                    <IncidentTicketsPage />
+                  </main>
+                } />
+       <Route path="/incidents/new" element={<NewIncident />} />
                 <Route path="/settings" element={<StudentSettingsPage />} />
+ main
               </Route>
 
               <Route element={<ProtectedRoute allowedRoles={['STUDENT', 'ADMIN', 'STAFF']} />}>
@@ -94,12 +109,28 @@ function App() {
                 <Route path="/admin/facilities" element={<FacilityList />} />
                 <Route path="/admin/facilities/new" element={<AddFacility />} />
                 <Route path="/admin/facilities/:facilityId/edit" element={<EditFacility />} />
+ ticket-flow
+                <Route path="/admin/incidents" element={
+                  <main className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
+                    <AdminIncidentsPage />
+                  </main>
+                } />
+
                 <Route path="/admin/bookings" element={<ManageBookingsPage />} />
+ main
               </Route>
 
               <Route element={<ProtectedRoute allowedRoles={['STAFF', 'ADMIN']} />}>
                 <Route path="/dashboard/staff" element={<StaffDashboard />} />
+ ticket-flow
+                <Route path="/incidents/queue" element={
+                  <main className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
+                    <IncidentQueuePage />
+                  </main>
+                } />
+
                 <Route path="/users" element={<UsersListPage />} />
+ main
               </Route>
             </Route>
 

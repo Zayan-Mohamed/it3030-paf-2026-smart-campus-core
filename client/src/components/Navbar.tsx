@@ -46,6 +46,21 @@ export const Navbar = () => {
         <div className="flex items-center gap-2 sm:gap-4">
           {user ? (
             <>
+              <Link to="/dashboard" className="text-sm font-semibold text-slate-700 transition hover:text-slate-900">
+                Dashboard
+              </Link>
+            
+              <Link to="/incidents/new" className="text-sm font-semibold text-cyan-700 transition hover:text-cyan-800">
+                Report Incident
+              </Link>
+              <Link to="/incidents" className="text-sm font-semibold text-blue-700 transition hover:text-blue-800">
+                My Incidents
+              </Link>
+              <span className="hidden rounded-full bg-slate-100 px-3 py-1 text-xs text-slate-600 sm:inline">{user.email}</span>
+              <Button onClick={handleLogout} variant="outline" size="sm">
+                Logout
+              </Button>
+
               {/* Quick Links */}
               <div className="hidden md:flex items-center gap-2 mr-2">
                 <Link to="/dashboard">
@@ -130,6 +145,7 @@ export const Navbar = () => {
                   <span className="sr-only">Logout</span>
                 </Button>
               </div>
+ main
             </>
           ) : (
             <div className="flex items-center gap-3">

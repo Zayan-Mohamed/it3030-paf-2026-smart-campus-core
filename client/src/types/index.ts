@@ -82,20 +82,56 @@ export interface BookingConflictResult {
   conflictingBookings: BookingConflict[];
 }
 
-export type IncidentCategory = 'ELECTRICAL' | 'FURNITURE' | 'AV_EQUIPMENT' | 'NETWORK' | 'OTHER';
+export type IncidentCategory =
+  | 'ELECTRICAL'
+  | 'PLUMBING'
+  | 'HVAC'
+  | 'EQUIPMENT'
+  | 'CLEANLINESS'
+  | 'SECURITY'
+  | 'FURNITURE'
+  | 'AV_EQUIPMENT'
+  | 'NETWORK'
+  | 'OTHER';
 export type IncidentPriority = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
 export type IncidentStatus = 'OPEN' | 'IN_PROGRESS' | 'RESOLVED' | 'CLOSED' | 'CANCELLED';
 
 export interface Incident {
   id: number;
+  reporterId?: number | null;
+  reporterName?: string | null;
   resourceLocation: string;
   category: IncidentCategory;
   description: string;
   priority: IncidentPriority;
   preferredContact: string;
   status: IncidentStatus;
+  assignedToId?: number | null;
+  assignedToName?: string | null;
+  resolutionNotes?: string | null;
+  rejectionReason?: string | null;
   imageUrls: string[];
+  resolvedAt?: string | null;
   createdAt: string;
+  updatedAt?: string | null;
+}
+
+export interface IncidentAssignee {
+  id: number;
+  name: string;
+  email: string;
+}
+
+export interface IncidentComment {
+  id: number;
+  incidentId: number;
+  authorId: number;
+  authorName: string;
+  content: string;
+  createdAt: string;
+  updatedAt: string;
+  canEdit: boolean;
+  canDelete: boolean;
 }
 
 export interface ApiError {
