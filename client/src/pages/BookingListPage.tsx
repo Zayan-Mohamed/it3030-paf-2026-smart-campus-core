@@ -27,12 +27,26 @@ const bookingStatuses: Array<{ value: BookingStatus | ''; label: string }> = [
   { value: 'COMPLETED', label: 'Completed' },
 ];
 
+const toLocalDateKey = (value: string) => {
+  const date = new Date(value);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+const dateFilterLabel = (value: string) => {
+  const date = new Date(`${value}T00:00:00`);
+  return new Intl.DateTimeFormat('en-LK', { dateStyle: 'medium' }).format(date);
+};
+
 export const BookingListPage = () => {
   const { token } = useAuth();
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [facilities, setFacilities] = useState<Facility[]>([]);
   const [statusFilter, setStatusFilter] = useState<BookingStatus | ''>('');
   const [facilityFilter, setFacilityFilter] = useState<number | ''>('');
+  const [bookedDateFilter, setBookedDateFilter] = useState<string | ''>('');
   const [loading, setLoading] = useState(true);
   const [actionId, setActionId] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -63,7 +77,7 @@ export const BookingListPage = () => {
 
   useEffect(() => {
     void loadData();
-  }, [token, statusFilter, facilityFilter]);
+  }, [token, statusFilter, facilityFilter, bookedDateFilter]);
 
   const handleDelete = async (bookingId: number) => {
     if (!token || !window.confirm('Delete this booking request?')) {
@@ -97,6 +111,42 @@ export const BookingListPage = () => {
     }
   };
 
+  // Get available locations based on selected status
+  const getAvailableLocations = () => {
+    const availableFacilityIds = new Set<number>();
+    bookings.forEach((booking) => {
+      const statusMatch = !statusFilter || booking.status === statusFilter;
+      const dateMatch = !bookedDateFilter || toLocalDateKey(booking.startTime) === bookedDateFilter;
+      if (statusMatch && dateMatch) {
+        availableFacilityIds.add(booking.facilityId);
+      }
+    });
+    return facilities.filter((facility) => availableFacilityIds.has(facility.id));
+  };
+
+  // Get available dates based on selected status
+  const getAvailableDates = () => {
+    const availableDates = new Set<string>();
+    bookings.forEach((booking) => {
+      const statusMatch = !statusFilter || booking.status === statusFilter;
+      const locationMatch = !facilityFilter || booking.facilityId === facilityFilter;
+      if (statusMatch && locationMatch) {
+        availableDates.add(toLocalDateKey(booking.startTime));
+      }
+    });
+    return Array.from(availableDates).sort((a, b) => a.localeCompare(b));
+  };
+
+  // Get filtered bookings based on all three filters
+  const getFilteredBookings = () => {
+    return bookings.filter((booking) => {
+      const statusMatch = !statusFilter || booking.status === statusFilter;
+      const locationMatch = !facilityFilter || booking.facilityId === facilityFilter;
+      const dateMatch = !bookedDateFilter || toLocalDateKey(booking.startTime) === bookedDateFilter;
+      return statusMatch && locationMatch && dateMatch;
+    });
+  };
+
   return (
     <div className="dashboard-layout">
 
@@ -125,10 +175,10 @@ export const BookingListPage = () => {
           <Card className="mb-6 border-slate-200/80 shadow-lg shadow-slate-900/5">
             <CardHeader>
               <CardTitle className="text-lg">Filters</CardTitle>
-              <CardDescription>Use status and facility filters to narrow your booking list.</CardDescription>
+              <CardDescription>Select status first, then location and date options will update based on available bookings.</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid gap-4 md:grid-cols-3">
+              <div className="grid gap-4 md:grid-cols-4">
                 <div className="space-y-2">
                   <label htmlFor="statusFilter" className="text-sm font-medium text-slate-700">Status</label>
                   <Select id="statusFilter" value={statusFilter} onChange={(event) => setStatusFilter(event.target.value as BookingStatus | '')}>
@@ -141,16 +191,28 @@ export const BookingListPage = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <label htmlFor="facilityFilter" className="text-sm font-medium text-slate-700">Facility</label>
+                  <label htmlFor="facilityFilter" className="text-sm font-medium text-slate-700">Location</label>
                   <Select
                     id="facilityFilter"
                     value={facilityFilter === '' ? '' : String(facilityFilter)}
                     onChange={(event) => setFacilityFilter(event.target.value ? Number(event.target.value) : '')}
                   >
-                    <option value="">All facilities</option>
-                    {facilities.map((facility) => (
+                    <option value="">All locations</option>
+                    {getAvailableLocations().map((facility) => (
                       <option key={facility.id} value={facility.id}>
                         {facility.name}
+                      </option>
+                    ))}
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <label htmlFor="bookedDateFilter" className="text-sm font-medium text-slate-700">Booked Date</label>
+                  <Select id="bookedDateFilter" value={bookedDateFilter} onChange={(event) => setBookedDateFilter(event.target.value)}>
+                    <option value="">All dates</option>
+                    {getAvailableDates().map((dateValue) => (
+                      <option key={dateValue} value={dateValue}>
+                        {dateFilterLabel(dateValue)}
                       </option>
                     ))}
                   </Select>
@@ -177,16 +239,16 @@ export const BookingListPage = () => {
             <Card>
               <CardContent className="py-12 text-center text-sm text-slate-500">Loading bookings...</CardContent>
             </Card>
-          ) : bookings.length === 0 ? (
+          ) : getFilteredBookings().length === 0 ? (
             <Card>
               <CardContent className="py-12 text-center">
                 <p className="text-lg font-medium text-slate-900">No bookings found</p>
-                <p className="mt-2 text-sm text-slate-500">Create your first booking request to get started.</p>
+                <p className="mt-2 text-sm text-slate-500">Try adjusting your filters or create a new booking request.</p>
               </CardContent>
             </Card>
           ) : (
             <div className="grid gap-4">
-              {bookings.map((booking) => (
+              {getFilteredBookings().map((booking) => (
                 <Card key={booking.id} className="border-slate-200/80 shadow-lg shadow-slate-900/5">
                   <CardContent className="pt-6">
                     <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
