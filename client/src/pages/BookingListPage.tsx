@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   AlertCircle,
@@ -52,7 +52,7 @@ export const BookingListPage = () => {
   const [error, setError] = useState<string | null>(null);
 
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     if (!token) {
       setError('You must be logged in to view bookings.');
       setLoading(false);
@@ -73,11 +73,11 @@ export const BookingListPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [token, statusFilter, facilityFilter]);
 
   useEffect(() => {
     void loadData();
-  }, [token, statusFilter, facilityFilter, bookedDateFilter]);
+  }, [token, statusFilter, facilityFilter, bookedDateFilter, loadData]);
 
   const handleDelete = async (bookingId: number) => {
     if (!token || !window.confirm('Delete this booking request?')) {

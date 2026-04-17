@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import {
   AlertCircle,
@@ -27,7 +27,7 @@ export const BookingDetailsPage = () => {
   const [error, setError] = useState<string | null>(null);
 
 
-  const loadBooking = async () => {
+  const loadBooking = useCallback(async () => {
     if (!token || !bookingId) {
       setError('Booking could not be loaded.');
       setLoading(false);
@@ -43,11 +43,11 @@ export const BookingDetailsPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [token, bookingId]);
 
   useEffect(() => {
     void loadBooking();
-  }, [token, bookingId]);
+  }, [loadBooking]);
 
   const handleDelete = async () => {
     if (!token || !booking || !window.confirm('Delete this booking request?')) {

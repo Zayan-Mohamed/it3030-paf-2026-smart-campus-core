@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   AlertCircle,
@@ -42,7 +42,7 @@ export const BookingCalendarPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const loadCalendar = async () => {
+  const loadCalendar = useCallback(async () => {
     if (!token) {
       setError('You must be logged in to view the booking calendar.');
       setLoading(false);
@@ -67,11 +67,11 @@ export const BookingCalendarPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [token, selectedFacility, weekStart]);
 
   useEffect(() => {
     void loadCalendar();
-  }, [token, selectedFacility, weekStart]);
+  }, [loadCalendar]);
 
   const days = Array.from({ length: 7 }, (_, index) => {
     const date = new Date(weekStart);

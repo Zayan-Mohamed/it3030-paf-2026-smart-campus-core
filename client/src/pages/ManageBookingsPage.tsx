@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
   AlertCircle,
   CheckCircle,
@@ -11,7 +11,7 @@ import {
   ChevronRight,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
-import { adminCancelBooking, bookingStatusClasses, bookingStatusLabel, bookingStatusBackgroundColor, formatDateTime, formatDate, formatTime, getBookings, reviewBooking, getPublicHolidays, isPublicHoliday } from '../lib/bookings';
+import { adminCancelBooking, bookingStatusClasses, bookingStatusLabel, bookingStatusBackgroundColor, formatDateTime, formatTime, getBookings, reviewBooking, isPublicHoliday } from '../lib/bookings';
 import type { Booking, BookingStatus } from '../types';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
@@ -60,7 +60,7 @@ export const ManageBookingsPage = () => {
   const [calendarMonth, setCalendarMonth] = useState<Date>(() => new Date());
 
 
-  const loadBookings = async () => {
+  const loadBookings = useCallback(async () => {
     if (!token) {
       setError('You must be logged in to manage bookings.');
       setLoading(false);
@@ -77,11 +77,11 @@ export const ManageBookingsPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [token, statusFilter]);
 
   useEffect(() => {
     void loadBookings();
-  }, [token, statusFilter]);
+  }, [loadBookings]);
 
   const handleApprove = async (bookingId: number) => {
     if (!token || !window.confirm('Approve this booking?')) {
@@ -167,9 +167,6 @@ export const ManageBookingsPage = () => {
       setActionId(null);
     }
   };
-
-  const bookedDateOptions = [...new Set(bookings.map((booking) => toLocalDateKey(booking.startTime)))].sort((first, second) => first.localeCompare(second));
-  const locationOptions = [...new Set(bookings.map((booking) => booking.facilityLocation))].sort((first, second) => first.localeCompare(second));
 
   // Smart filter functions based on selected status
   const getAvailableLocations = () => {
