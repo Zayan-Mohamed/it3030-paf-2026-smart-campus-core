@@ -7,6 +7,7 @@ import { Button } from '../components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Select } from '../components/ui/select';
 import { Textarea } from '../components/ui/textarea';
+import { IncidentComments } from '../components/incidents/IncidentComments';
 
 const API_BASE_URL = 'http://localhost:8080';
 
@@ -343,6 +344,8 @@ export const AdminIncidentsPage = () => {
                     Rejection Reason: {incident.rejectionReason}
                   </div>
                 ) : null}
+
+                <IncidentComments incidentId={incident.id} />
               </CardContent>
             </Card>
           ))}

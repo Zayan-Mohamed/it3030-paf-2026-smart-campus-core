@@ -5,6 +5,7 @@ import type { Incident, IncidentPriority, IncidentStatus } from '../types';
 import { Badge } from '../components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
+import { IncidentComments } from '../components/incidents/IncidentComments';
 
 const API_BASE_URL = 'http://localhost:8080';
 
@@ -229,6 +230,8 @@ export const IncidentTicketsPage = () => {
                     ))}
                   </div>
                 ) : null}
+
+                <IncidentComments incidentId={incident.id} />
               </div>
             );
           })}

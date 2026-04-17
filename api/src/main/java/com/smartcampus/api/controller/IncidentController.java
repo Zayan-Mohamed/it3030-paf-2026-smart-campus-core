@@ -1,10 +1,13 @@
 package com.smartcampus.api.controller;
 
 import com.smartcampus.api.dto.incident.AssignIncidentRequest;
+import com.smartcampus.api.dto.incident.CreateIncidentCommentRequest;
 import com.smartcampus.api.dto.incident.CreateIncidentRequest;
 import com.smartcampus.api.dto.incident.IncidentAssigneeResponse;
+import com.smartcampus.api.dto.incident.IncidentCommentResponse;
 import com.smartcampus.api.dto.incident.IncidentResponse;
 import com.smartcampus.api.dto.incident.RejectIncidentRequest;
+import com.smartcampus.api.dto.incident.UpdateIncidentCommentRequest;
 import com.smartcampus.api.dto.incident.UpdateIncidentStatusRequest;
 import com.smartcampus.api.model.User;
 import com.smartcampus.api.service.IncidentService;
@@ -17,6 +20,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -118,5 +122,52 @@ public class IncidentController {
             return ResponseEntity.status(401).build();
         }
         return ResponseEntity.ok(incidentService.rejectIncident(incidentId, request));
+    }
+
+    @GetMapping("/{incidentId}/comments")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<List<IncidentCommentResponse>> getIncidentComments(
+            @AuthenticationPrincipal User user,
+            @PathVariable Long incidentId) {
+        if (user == null) {
+            return ResponseEntity.status(401).build();
+        }
+        return ResponseEntity.ok(incidentService.getIncidentComments(user, incidentId));
+    }
+
+    @PostMapping("/{incidentId}/comments")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<IncidentCommentResponse> addIncidentComment(
+            @AuthenticationPrincipal User user,
+            @PathVariable Long incidentId,
+            @Valid @RequestBody CreateIncidentCommentRequest request) {
+        if (user == null) {
+            return ResponseEntity.status(401).build();
+        }
+        return ResponseEntity.ok(incidentService.addIncidentComment(user, incidentId, request));
+    }
+
+    @PatchMapping("/comments/{commentId}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<IncidentCommentResponse> updateIncidentComment(
+            @AuthenticationPrincipal User user,
+            @PathVariable Long commentId,
+            @Valid @RequestBody UpdateIncidentCommentRequest request) {
+        if (user == null) {
+            return ResponseEntity.status(401).build();
+        }
+        return ResponseEntity.ok(incidentService.updateIncidentComment(user, commentId, request));
+    }
+
+    @DeleteMapping("/comments/{commentId}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Void> deleteIncidentComment(
+            @AuthenticationPrincipal User user,
+            @PathVariable Long commentId) {
+        if (user == null) {
+            return ResponseEntity.status(401).build();
+        }
+        incidentService.deleteIncidentComment(user, commentId);
+        return ResponseEntity.noContent().build();
     }
 }

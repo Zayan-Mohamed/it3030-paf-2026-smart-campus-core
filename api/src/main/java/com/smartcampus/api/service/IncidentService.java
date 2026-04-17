@@ -2,14 +2,19 @@ package com.smartcampus.api.service;
 
 import com.smartcampus.api.dto.incident.AssignIncidentRequest;
 import com.smartcampus.api.dto.incident.CreateIncidentRequest;
+import com.smartcampus.api.dto.incident.CreateIncidentCommentRequest;
 import com.smartcampus.api.dto.incident.IncidentAssigneeResponse;
+import com.smartcampus.api.dto.incident.IncidentCommentResponse;
 import com.smartcampus.api.dto.incident.IncidentResponse;
 import com.smartcampus.api.dto.incident.RejectIncidentRequest;
+import com.smartcampus.api.dto.incident.UpdateIncidentCommentRequest;
 import com.smartcampus.api.dto.incident.UpdateIncidentStatusRequest;
 import com.smartcampus.api.model.Incident;
 import com.smartcampus.api.model.IncidentAttachment;
+import com.smartcampus.api.model.IncidentComment;
 import com.smartcampus.api.model.Role;
 import com.smartcampus.api.model.User;
+import com.smartcampus.api.repository.IncidentCommentRepository;
 import com.smartcampus.api.repository.IncidentRepository;
 import com.smartcampus.api.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -36,6 +41,7 @@ public class IncidentService {
             "image/webp");
 
     private final IncidentRepository incidentRepository;
+    private final IncidentCommentRepository incidentCommentRepository;
     private final UserRepository userRepository;
     private final SupabaseStorageService supabaseStorageService;
 
@@ -177,6 +183,51 @@ public class IncidentService {
         return mapToResponse(saved);
     }
 
+    public List<IncidentCommentResponse> getIncidentComments(User currentUser, Long incidentId) {
+        Incident incident = findIncidentForCommentAccess(currentUser, incidentId);
+        return incidentCommentRepository.findByIncidentOrderByCreatedAtAsc(incident)
+                .stream()
+                .map(comment -> mapCommentToResponse(comment, currentUser))
+                .toList();
+    }
+
+    public IncidentCommentResponse addIncidentComment(User currentUser, Long incidentId, CreateIncidentCommentRequest request) {
+        Incident incident = findIncidentForCommentAccess(currentUser, incidentId);
+
+        IncidentComment comment = IncidentComment.builder()
+                .incident(incident)
+                .author(currentUser)
+                .content(request.getContent().trim())
+                .build();
+
+        IncidentComment saved = incidentCommentRepository.save(comment);
+        return mapCommentToResponse(saved, currentUser);
+    }
+
+    public IncidentCommentResponse updateIncidentComment(User currentUser, Long commentId, UpdateIncidentCommentRequest request) {
+        IncidentComment comment = incidentCommentRepository.findById(commentId)
+                .orElseThrow(() -> new IllegalArgumentException("Comment not found"));
+
+        if (!canManageComment(currentUser, comment)) {
+            throw new AccessDeniedException("You can only edit your own comments");
+        }
+
+        comment.setContent(request.getContent().trim());
+        IncidentComment saved = incidentCommentRepository.save(comment);
+        return mapCommentToResponse(saved, currentUser);
+    }
+
+    public void deleteIncidentComment(User currentUser, Long commentId) {
+        IncidentComment comment = incidentCommentRepository.findById(commentId)
+                .orElseThrow(() -> new IllegalArgumentException("Comment not found"));
+
+        if (!canManageComment(currentUser, comment)) {
+            throw new AccessDeniedException("You can only delete your own comments");
+        }
+
+        incidentCommentRepository.delete(comment);
+    }
+
     private void validateAttachments(List<MultipartFile> attachments) {
         if (attachments.size() > MAX_ATTACHMENTS) {
             throw new IllegalArgumentException("You can upload up to 3 images only");
@@ -212,6 +263,49 @@ public class IncidentService {
         if (!allowed) {
             throw new IllegalArgumentException("Invalid incident status transition");
         }
+    }
+
+    private Incident findIncidentForCommentAccess(User currentUser, Long incidentId) {
+        Incident incident = incidentRepository.findById(incidentId)
+                .orElseThrow(() -> new IllegalArgumentException("Incident not found"));
+
+        if (currentUser.hasRole(Role.ADMIN)) {
+            return incident;
+        }
+
+        boolean isReporter = incident.getReporter() != null && incident.getReporter().getId().equals(currentUser.getId());
+        boolean isAssignedStaff = incident.getAssignedTo() != null && incident.getAssignedTo().getId().equals(currentUser.getId());
+
+        if (!isReporter && !isAssignedStaff) {
+            throw new AccessDeniedException("You do not have access to comment on this incident");
+        }
+
+        return incident;
+    }
+
+    private boolean canManageComment(User currentUser, IncidentComment comment) {
+        if (currentUser.hasRole(Role.ADMIN)) {
+            return true;
+        }
+
+        return comment.getAuthor() != null && comment.getAuthor().getId().equals(currentUser.getId());
+    }
+
+    private IncidentCommentResponse mapCommentToResponse(IncidentComment comment, User currentUser) {
+        User author = comment.getAuthor();
+        boolean canManage = canManageComment(currentUser, comment);
+
+        return IncidentCommentResponse.builder()
+                .id(comment.getId())
+                .incidentId(comment.getIncident().getId())
+                .authorId(author != null ? author.getId() : null)
+                .authorName(author != null ? author.getName() : "Unknown")
+                .content(comment.getContent())
+                .createdAt(comment.getCreatedAt())
+                .updatedAt(comment.getUpdatedAt())
+                .canEdit(canManage)
+                .canDelete(canManage)
+                .build();
     }
 
     private IncidentResponse mapToResponse(Incident incident) {

@@ -111,3 +111,15 @@ export interface IncidentAssignee {
   name: string;
   email: string;
 }
+
+export interface IncidentComment {
+  id: number;
+  incidentId: number;
+  authorId: number;
+  authorName: string;
+  content: string;
+  createdAt: string;
+  updatedAt: string;
+  canEdit: boolean;
+  canDelete: boolean;
+}

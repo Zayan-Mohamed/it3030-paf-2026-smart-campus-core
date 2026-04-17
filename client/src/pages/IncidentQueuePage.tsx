@@ -6,6 +6,7 @@ import { Badge } from '../components/ui/badge';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Textarea } from '../components/ui/textarea';
+import { IncidentComments } from '../components/incidents/IncidentComments';
 
 const API_BASE_URL = 'http://localhost:8080';
 
@@ -282,6 +283,8 @@ export const IncidentQueuePage = () => {
                   ) : (
                     <p className="text-xs font-semibold text-slate-500">No further action available.</p>
                   )}
+
+                  <IncidentComments incidentId={incident.id} />
                 </CardContent>
               </Card>
             );
