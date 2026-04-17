@@ -1,5 +1,6 @@
 package com.smartcampus.api.controller;
 
+import com.smartcampus.api.dto.user.CreateUserDto;
 import com.smartcampus.api.dto.user.UpdateUserDto;
 import com.smartcampus.api.dto.user.UserDto;
 import com.smartcampus.api.dto.user.UserListDto;
@@ -25,6 +26,11 @@ public class UserController {
     @GetMapping("/{id}")
     public ResponseEntity<UserDto> getUserById(@PathVariable Long id) {
         return ResponseEntity.ok(userService.getUserById(id));
+    }
+
+    @PostMapping
+    public ResponseEntity<UserDto> createUser(@Valid @RequestBody CreateUserDto createDto) {
+        return ResponseEntity.ok(userService.createUser(createDto));
     }
 
     @PutMapping("/{id}")

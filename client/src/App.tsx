@@ -110,6 +110,7 @@ ticket-flow
                 <Route path="/admin/facilities" element={<FacilityList />} />
                 <Route path="/admin/facilities/new" element={<AddFacility />} />
                 <Route path="/admin/facilities/:facilityId/edit" element={<EditFacility />} />
+                <Route path="/admin/users" element={<UsersListPage />} />
  ticket-flow
                 <Route path="/admin/incidents" element={
                   <main className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
@@ -129,8 +130,6 @@ ticket-flow
                     <IncidentQueuePage />
                   </main>
                 } />
-
-                <Route path="/users" element={<UsersListPage />} />
  main
               </Route>
               

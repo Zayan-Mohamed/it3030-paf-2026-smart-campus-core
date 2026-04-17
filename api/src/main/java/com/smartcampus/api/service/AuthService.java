@@ -80,6 +80,7 @@ public class AuthService {
         user.setEnabled(true);
         user.setOtpCode(null);
         user.setOtpExpiry(null);
+        user.setLastLogin(LocalDateTime.now());
         userRepository.save(user);
 
         String token = jwtService.generateToken(user);
@@ -102,6 +103,9 @@ public class AuthService {
         if (!user.getEnabled()) {
             throw new IllegalArgumentException("Please verify your email via OTP before logging in");
         }
+
+        user.setLastLogin(LocalDateTime.now());
+        userRepository.save(user);
 
         String token = jwtService.generateToken(user);
         return new TokenResponse(token);

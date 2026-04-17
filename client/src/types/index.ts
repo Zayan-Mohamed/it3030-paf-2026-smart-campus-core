@@ -10,6 +10,10 @@ export interface User {
   phoneNumber?: string;
   employeeId?: string;
   department?: string;
+  enabled?: boolean;
+  lastLogin?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export type FacilityType =

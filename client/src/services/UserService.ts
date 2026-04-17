@@ -25,7 +25,20 @@ export const UserService = {
     return response.json();
   },
 
-  async updateUser(id: number, data: { name?: string; pictureUrl?: string; studentRegistrationNumber?: string; faculty?: string; major?: string; phoneNumber?: string; employeeId?: string; department?: string }) {
+  async createUser(data: Record<string, unknown>) {
+    const response = await fetch(API_BASE_URL, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      const errData = await response.json().catch(() => ({}));
+      throw new Error(errData.message || 'Failed to create user');
+    }
+    return response.json();
+  },
+
+  async updateUser(id: number, data: { name?: string; pictureUrl?: string; studentRegistrationNumber?: string; faculty?: string; major?: string; phoneNumber?: string; employeeId?: string; department?: string; roles?: string[]; enabled?: boolean }) {
     const response = await fetch(`${API_BASE_URL}/${id}`, {
       method: 'PUT',
       headers: getHeaders(),

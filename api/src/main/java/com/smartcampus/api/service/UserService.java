@@ -1,5 +1,6 @@
 package com.smartcampus.api.service;
 
+import com.smartcampus.api.dto.user.CreateUserDto;
 import com.smartcampus.api.dto.user.UpdateUserDto;
 import com.smartcampus.api.dto.user.UserDto;
 import com.smartcampus.api.dto.user.UserListDto;
@@ -15,6 +16,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -26,6 +28,7 @@ import java.util.stream.Collectors;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
     @Transactional(readOnly = true)
@@ -50,6 +53,28 @@ public class UserService {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
         return mapToDto(user);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @Transactional
+    public UserDto createUser(CreateUserDto createDto) {
+        if (userRepository.findByEmail(createDto.getEmail()).isPresent()) {
+            throw new IllegalArgumentException("Email already in use");
+        }
+
+        User user = User.builder()
+                .email(createDto.getEmail())
+                .name(createDto.getName())
+                .password(passwordEncoder.encode(createDto.getPassword()))
+                .roles(createDto.getRoles() != null && !createDto.getRoles().isEmpty() ? createDto.getRoles() : java.util.Set.of(Role.STUDENT))
+                .enabled(createDto.getEnabled() != null ? createDto.getEnabled() : true)
+                .employeeId(createDto.getEmployeeId())
+                .department(createDto.getDepartment())
+                .phoneNumber(createDto.getPhoneNumber())
+                .build();
+        
+        User savedUser = userRepository.save(user);
+        return mapToDto(savedUser);
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'STAFF') or @userService.isCurrentUser(#id)")

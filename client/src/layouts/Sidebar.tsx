@@ -12,7 +12,16 @@ export const Sidebar = () => {
   const { user, logout } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(() => {
+    const saved = localStorage.getItem('sidebarOpen');
+    return saved !== null ? JSON.parse(saved) : true;
+  });
+
+  const toggleSidebar = () => {
+    const newState = !sidebarOpen;
+    setSidebarOpen(newState);
+    localStorage.setItem('sidebarOpen', JSON.stringify(newState));
+  };
 
   if (!user) return null;
 
@@ -48,7 +57,7 @@ export const Sidebar = () => {
   return (
     <aside className={`sidebar ${!sidebarOpen ? 'collapsed' : ''} shrink-0 z-10`}>
       <div className="sidebar-header">
-        <button className="sidebar-toggle" onClick={() => setSidebarOpen(!sidebarOpen)}>
+        <button className="sidebar-toggle" onClick={toggleSidebar}>
           {sidebarOpen ? <ChevronLeft size={20} /> : <ChevronRight size={20} />}
         </button>
         {sidebarOpen && <h2 className="sidebar-title">{panelTitle}</h2>}
@@ -164,22 +173,50 @@ export const Sidebar = () => {
         
       </nav>
 
-      {sidebarOpen && (
-        <div className="sidebar-footer mt-auto">
-          <div className="user-info">
-            {user?.pictureUrl && (
-              <img src={user.pictureUrl} alt="Profile" className="user-avatar" style={{ cursor: 'pointer' }} onClick={() => navigate('/settings')} title="Account Settings" />
-            )}
-            <div className="user-details" style={{ cursor: 'pointer' }} onClick={() => navigate('/settings')} title="Account Settings">
-              <p className="user-name">{user?.name}</p>
-              <p className="user-role">{roleTitle}</p>
+      <div className={cn("mt-auto", sidebarOpen ? "sidebar-footer" : "flex flex-col items-center gap-4 py-6 border-t border-slate-200")}>
+        <div className={cn(sidebarOpen ? "user-info" : "flex items-center justify-center")}>
+          {user?.pictureUrl ? (
+            <img 
+              src={user.pictureUrl} 
+              alt="Profile" 
+              className={cn("rounded-full", sidebarOpen ? "user-avatar" : "w-10 h-10 ring-2 ring-white shadow-sm")} 
+              style={{ cursor: 'pointer' }} 
+              onClick={() => navigate('/settings')} 
+              title="Account Settings" 
+            />
+          ) : (
+            <div 
+              className={cn("flex items-center justify-center bg-cyan-100 text-cyan-800 font-bold rounded-full shrink-0 ring-2 ring-white shadow-sm", sidebarOpen ? "w-10 h-10" : "w-10 h-10")}
+              style={{ cursor: 'pointer' }}
+              onClick={() => navigate('/settings')} 
+              title="Account Settings"
+            >
+              {user?.name?.charAt(0).toUpperCase()}
             </div>
-          </div>
-          <button onClick={handleLogout} className="logout-btn">
-            <LogOut size={20} /> Logout
-          </button>
+          )}
+          {sidebarOpen && (
+            <div className="user-details flex-1 min-w-0" style={{ cursor: 'pointer' }} onClick={() => navigate('/settings')} title="Account Settings">
+              <p className="user-name truncate text-sm font-semibold">{user?.name}</p>
+              <p className="user-role truncate text-xs text-slate-500">{roleTitle}</p>
+            </div>
+          )}
         </div>
-      )}
+        
+        {sidebarOpen ? (
+          <button onClick={handleLogout} className="logout-btn" title="Logout">
+            <LogOut size={20} /> <span>Logout</span>
+          </button>
+        ) : (
+          <button 
+            onClick={handleLogout} 
+            className="flex items-center justify-center w-10 h-10 rounded-full text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors" 
+            title="Logout"
+          >
+            <LogOut size={20} />
+            <span className="sr-only">Logout</span>
+          </button>
+        )}
+      </div>
     </aside>
   );
 };
