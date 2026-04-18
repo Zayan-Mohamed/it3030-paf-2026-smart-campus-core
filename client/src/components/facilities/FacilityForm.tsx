@@ -23,7 +23,6 @@ type FacilityFormState = {
   location: string;
   capacity: string;
   status: FacilityStatus | '';
-  imageUrl: string;
   otherAmenities: string;
   availableFrom: string;
   availableTo: string;
@@ -42,7 +41,7 @@ const facilityTypes: FacilityType[] = [
 ];
 
 const facilityStatuses: FacilityStatus[] = ['AVAILABLE', 'UNDER_MAINTENANCE', 'UNAVAILABLE'];
-const amenityOptions = [
+const predefinedAmenities = [
   'Projector',
   'WiFi',
   'Air Conditioning',
@@ -56,14 +55,30 @@ const amenityOptions = [
   'Wheelchair Access',
 ];
 
-function splitAmenities(value?: string | string[] | null) {
+function normalizeAmenity(value: string) {
+  return value.trim().toLowerCase();
+}
+
+type FacilityAmenityValue = string | { name?: string | null } | null | undefined;
+
+function splitAmenities(value?: string | FacilityAmenityValue[] | null) {
   if (!value) {
     return [];
   }
 
   if (Array.isArray(value)) {
     return value
-      .map((item) => String(item).trim())
+      .map((item) => {
+        if (typeof item === 'string') {
+          return item.trim();
+        }
+
+        if (item && typeof item === 'object' && 'name' in item) {
+          return typeof item.name === 'string' ? item.name.trim() : '';
+        }
+
+        return '';
+      })
       .filter(Boolean);
   }
 
@@ -77,12 +92,24 @@ function splitAmenities(value?: string | string[] | null) {
     .filter(Boolean);
 }
 
-function splitAmenitySelections(value?: string | string[] | null) {
-  const amenities = splitAmenities(value);
+function splitAmenitySelections(value?: string | FacilityAmenityValue[] | null) {
+  const amenityItems = splitAmenities(value);
 
   return {
-    selectedAmenities: amenities.filter((amenity) => amenityOptions.includes(amenity)),
-    otherAmenities: amenities.filter((amenity) => !amenityOptions.includes(amenity)).join(', '),
+    selectedAmenities: predefinedAmenities.filter((predefinedAmenity) =>
+      amenityItems.some(
+        (item) => normalizeAmenity(item) === normalizeAmenity(predefinedAmenity)
+      )
+    ),
+    otherAmenities: amenityItems
+      .filter(
+        (item) =>
+          !predefinedAmenities.some(
+            (predefinedAmenity) =>
+              normalizeAmenity(predefinedAmenity) === normalizeAmenity(item)
+          )
+      )
+      .join(', '),
   };
 }
 
@@ -96,7 +123,6 @@ function getInitialState(initialValues?: Facility | null): FacilityFormState {
     location: initialValues?.location ?? '',
     capacity: initialValues?.capacity !== undefined ? String(initialValues.capacity) : '',
     status: initialValues?.status ?? '',
-    imageUrl: initialValues?.imageUrl ?? '',
     otherAmenities,
     availableFrom: toTimeInputValue(initialValues?.availableFrom),
     availableTo: toTimeInputValue(initialValues?.availableTo),
@@ -110,7 +136,9 @@ export const FacilityForm = ({
   onSubmit,
 }: FacilityFormProps) => {
   const [form, setForm] = useState<FacilityFormState>(() => getInitialState(initialValues));
-  const [selectedAmenities, setSelectedAmenities] = useState<string[]>(() => splitAmenitySelections(initialValues?.amenities).selectedAmenities);
+  const [selectedAmenities, setSelectedAmenities] = useState<string[]>(
+    () => splitAmenitySelections(initialValues?.amenities).selectedAmenities
+  );
   const [fieldErrors, setFieldErrors] = useState<FacilityFormErrors>({});
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -201,11 +229,8 @@ export const FacilityForm = ({
         location: form.location.trim(),
         capacity: Number(form.capacity),
         status: form.status as FacilityStatus,
-        imageUrl: form.imageUrl.trim(),
-        amenities: [
-          ...selectedAmenities,
-          ...splitAmenities(form.otherAmenities),
-        ].join(', '),
+        imageUrl: '',
+        amenities: [...selectedAmenities, ...splitAmenities(form.otherAmenities)].join(', '),
         availableFrom: normalizeFacilityTime(form.availableFrom),
         availableTo: normalizeFacilityTime(form.availableTo),
       });
@@ -319,19 +344,6 @@ export const FacilityForm = ({
           </div>
 
           <div>
-            <label htmlFor="imageUrl" className="mb-2 block text-sm font-medium text-slate-700">
-              Image URL
-            </label>
-            <input
-              id="imageUrl"
-              name="imageUrl"
-              value={form.imageUrl}
-              onChange={updateField}
-              className="w-full rounded-xl border border-slate-200 px-4 py-3 text-slate-900 outline-none transition focus:border-cyan-600 focus:ring-2 focus:ring-cyan-100"
-            />
-          </div>
-
-          <div>
             <label htmlFor="availableFrom" className="mb-2 block text-sm font-medium text-slate-700">
               Available From
             </label>
@@ -371,7 +383,7 @@ export const FacilityForm = ({
             Amenities
           </label>
           <div className="grid gap-3 rounded-xl border border-slate-200 bg-white px-4 py-4 md:grid-cols-2">
-            {amenityOptions.map((amenity) => (
+            {predefinedAmenities.map((amenity) => (
               <label key={amenity} className="flex items-center gap-3 text-sm text-slate-700">
                 <input
                   type="checkbox"
