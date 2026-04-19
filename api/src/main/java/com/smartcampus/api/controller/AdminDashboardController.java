@@ -1,18 +1,26 @@
 package com.smartcampus.api.controller;
 
 import com.smartcampus.api.dto.AdminDashboardResponse;
+import com.smartcampus.api.dto.user.UserDto;
 import com.smartcampus.api.model.Incident.IncidentStatus;
 import com.smartcampus.api.repository.BookingRepository;
 import com.smartcampus.api.repository.FacilityRepository;
 import com.smartcampus.api.repository.IncidentRepository;
 import com.smartcampus.api.repository.UserRepository;
+import com.smartcampus.api.model.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+
+import javax.sql.DataSource;
+import java.sql.Connection;
+import java.lang.management.ManagementFactory;
+import java.lang.management.RuntimeMXBean;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * REST Controller for Admin Dashboard operations.
@@ -36,6 +44,7 @@ public class AdminDashboardController {
     private final BookingRepository bookingRepository;
     private final IncidentRepository incidentRepository;
     private final FacilityRepository facilityRepository;
+    private final DataSource dataSource;
     
     /**
      * Get admin dashboard welcome data.
@@ -48,22 +57,62 @@ public class AdminDashboardController {
     @GetMapping("/welcome")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<AdminDashboardResponse> getWelcomeData(
-            @AuthenticationPrincipal UserDetails userDetails
+            @AuthenticationPrincipal User userDetails
     ) {
-        log.info("Admin dashboard welcome request from user: {}", userDetails.getUsername());
+        log.info("Admin dashboard welcome request from user: {}", userDetails.getName());
         
         long totalUsers = userRepository.count();
         long activeBookings = bookingRepository.count(); // Represents total or active bookings depending on logic
         long openIncidents = incidentRepository.countByStatus(IncidentStatus.OPEN);
         long totalFacilities = facilityRepository.count();
         
+        List<UserDto> recentUsers = userRepository.findTop5ByOrderByCreatedAtDesc().stream().map(u -> UserDto.builder()
+                .id(u.getId())
+                .name(u.getName())
+                .email(u.getEmail())
+                .roles(u.getRoles())
+                .createdAt(u.getCreatedAt())
+                .build()).collect(Collectors.toList());
+
+        String dbStatus = "DOWN";
+        try (Connection conn = dataSource.getConnection()) {
+            if (conn.isValid(1)) {
+                dbStatus = "UP";
+            }
+        } catch (Exception e) {
+            log.error("Database health check failed", e);
+        }
+
+        RuntimeMXBean runtimeBean = ManagementFactory.getRuntimeMXBean();
+        long uptimeMs = runtimeBean.getUptime();
+        long uptimeHours = uptimeMs / (1000 * 60 * 60);
+        long uptimeDays = uptimeHours / 24;
+        String uptimeStr = uptimeDays > 0 ? uptimeDays + " days" : uptimeHours + " hours";
+        if (uptimeHours == 0) {
+            uptimeStr = (uptimeMs / (1000 * 60)) + " mins";
+        }
+
+        long totalMemory = Runtime.getRuntime().totalMemory();
+        long freeMemory = Runtime.getRuntime().freeMemory();
+        long usedMemory = totalMemory - freeMemory;
+        int memoryUsagePercentage = (int) ((usedMemory * 100.0f) / totalMemory);
+
+        AdminDashboardResponse.SystemHealth systemHealth = AdminDashboardResponse.SystemHealth.builder()
+                .status("UP")
+                .database(dbStatus)
+                .uptime(uptimeStr)
+                .memoryUsagePercentage(memoryUsagePercentage)
+                .build();
+        
         AdminDashboardResponse response = AdminDashboardResponse.builder()
                 .message("Welcome Admin!")
-                .adminName(userDetails.getUsername())
+                .adminName(userDetails.getName())
                 .totalUsers((int) totalUsers)
                 .activeBookings((int) activeBookings)
                 .openIncidents((int) openIncidents)
                 .totalFacilities((int) totalFacilities)
+                .recentUsers(recentUsers)
+                .systemHealth(systemHealth)
                 .build();
         
         return ResponseEntity.ok(response);
@@ -80,9 +129,9 @@ public class AdminDashboardController {
     @GetMapping("/statistics")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> getSystemStatistics(
-            @AuthenticationPrincipal UserDetails userDetails
+            @AuthenticationPrincipal User userDetails
     ) {
-        log.info("System statistics request from admin: {}", userDetails.getUsername());
+        log.info("System statistics request from admin: {}", userDetails.getName());
         
         // Placeholder response until statistics services are wired in.
         return ResponseEntity.ok("System statistics - accessible only to admins");
@@ -99,9 +148,9 @@ public class AdminDashboardController {
     @GetMapping("/users/all")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> getAllUsers(
-            @AuthenticationPrincipal UserDetails userDetails
+            @AuthenticationPrincipal User userDetails
     ) {
-        log.info("Get all users request from admin: {}", userDetails.getUsername());
+        log.info("Get all users request from admin: {}", userDetails.getName());
         
         // Placeholder response until user administration services are wired in.
         return ResponseEntity.ok("All users - admin access only");
@@ -118,9 +167,9 @@ public class AdminDashboardController {
     @GetMapping("/audit/logs")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> getAuditLogs(
-            @AuthenticationPrincipal UserDetails userDetails
+            @AuthenticationPrincipal User userDetails
     ) {
-        log.info("Audit logs request from admin: {}", userDetails.getUsername());
+        log.info("Audit logs request from admin: {}", userDetails.getName());
         
         // Placeholder response until audit services are wired in.
         return ResponseEntity.ok("Audit logs - admin access only");

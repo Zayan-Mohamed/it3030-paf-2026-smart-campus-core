@@ -39,4 +39,9 @@ public class StudentDashboardResponse {
      * Number of available facilities
      */
     private Integer availableFacilities;
+    
+    /**
+     * Number of campus events
+     */
+    private Integer campusEvents;
 }

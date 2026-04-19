@@ -21,12 +21,16 @@ export function BookingConcierge() {
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-  
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
   const threadId = useRef(`booking_${Math.random().toString(36).substring(7)}`);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTo({
+        top: scrollContainerRef.current.scrollHeight,
+        behavior: 'smooth'
+      });
+    }
   };
 
   useEffect(() => {
@@ -65,8 +69,8 @@ export function BookingConcierge() {
   };
 
   return (
-    <div className="flex flex-col h-[600px] w-full max-w-2xl bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
-      <div className="bg-blue-600 p-4 text-white flex items-center space-x-3">
+    <div className="flex flex-col h-full w-full bg-white">
+      <div className="bg-blue-600 p-4 text-white flex items-center space-x-3 shrink-0">
         <Bot className="w-6 h-6" />
         <div>
           <h2 className="font-semibold text-lg">Booking Concierge</h2>
@@ -74,7 +78,7 @@ export function BookingConcierge() {
         </div>
       </div>
       
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50">
+      <div ref={scrollContainerRef} className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50">
         {messages.map((msg, idx) => (
           <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
             <div className={`flex max-w-[80%] ${msg.role === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
@@ -100,10 +104,9 @@ export function BookingConcierge() {
             </div>
           </div>
         )}
-        <div ref={messagesEndRef} />
       </div>
 
-      <div className="p-4 bg-white border-t border-gray-100">
+      <div className="p-4 bg-white border-t border-gray-100 shrink-0">
         <form onSubmit={handleSend} className="flex space-x-2">
           <input
             type="text"

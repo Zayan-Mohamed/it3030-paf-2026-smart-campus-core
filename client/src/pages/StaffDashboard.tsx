@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import {
   AlertTriangle,
   Clipboard,
@@ -6,15 +7,32 @@ import {
   Lightbulb,
 } from 'lucide-react';
 import '../styles/Dashboard.css';
+import { StaffDashboardService } from '../services/StaffDashboardService';
+import type { StaffDashboardData } from '../services/StaffDashboardService';
 
 export const StaffDashboard = () => {
+  const [data, setData] = useState<StaffDashboardData | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  // TODO: Fetch real stats from API
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const dashboardData = await StaffDashboardService.getDashboardData();
+        setData(dashboardData);
+      } catch (error) {
+        console.error('Error fetching staff dashboard stats:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchStats();
+  }, []);
+
   const stats = [
-    { title: 'Pending Incidents', value: '0', icon: AlertTriangle, color: '#f59e0b', change: 'Loading...' },
-    { title: 'Assigned Tasks', value: '0', icon: Clipboard, color: '#0891b2', change: 'Loading...' },
-    { title: 'Completed Today', value: '0', icon: CheckCircle, color: '#10b981', change: 'Loading...' },
-    { title: 'Avg Response Time', value: '-', icon: Clock, color: '#8b5cf6', change: 'Loading...' },
+    { title: 'Pending Incidents', value: loading ? '...' : data?.urgentIncidents?.toString() || '0', icon: AlertTriangle, color: '#f59e0b', change: loading ? 'Loading...' : 'High priority issues' },
+    { title: 'Assigned Tasks', value: loading ? '...' : data?.assignedTasks?.toString() || '0', icon: Clipboard, color: '#0891b2', change: loading ? 'Loading...' : 'Total assigned to you' },
+    { title: 'Completed Today', value: loading ? '...' : data?.completedToday?.toString() || '0', icon: CheckCircle, color: '#10b981', change: loading ? 'Loading...' : 'Tasks finished' },
+    { title: 'Avg Response Time', value: loading ? '...' : '-', icon: Clock, color: '#8b5cf6', change: loading ? 'Loading...' : 'This week' },
   ];
 
   return (

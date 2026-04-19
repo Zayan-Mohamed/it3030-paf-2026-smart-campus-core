@@ -1,5 +1,8 @@
 package com.smartcampus.api.dto;
 
+import com.smartcampus.api.dto.user.UserDto;
+import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -44,4 +47,25 @@ public class AdminDashboardResponse {
      * Total number of facilities in the system
      */
     private Integer totalFacilities;
+    
+    /**
+     * Recent users
+     */
+    private List<UserDto> recentUsers;
+    
+    /**
+     * System Health
+     */
+    private SystemHealth systemHealth;
+    
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class SystemHealth {
+        private String status;
+        private String database;
+        private String uptime;
+        private Integer memoryUsagePercentage;
+    }
 }

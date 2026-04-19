@@ -1,12 +1,16 @@
 package com.smartcampus.api.controller;
 
 import com.smartcampus.api.dto.StudentDashboardResponse;
+import com.smartcampus.api.model.User;
+import com.smartcampus.api.repository.BookingRepository;
+import com.smartcampus.api.repository.FacilityRepository;
+import com.smartcampus.api.repository.IncidentRepository;
+import com.smartcampus.api.repository.CampusEventRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -27,6 +31,11 @@ import org.springframework.web.bind.annotation.*;
 @CrossOrigin(origins = {"http://localhost:5173", "http://localhost:3000", "http://localhost:5174"})
 public class StudentDashboardController {
     
+    private final BookingRepository bookingRepository;
+    private final IncidentRepository incidentRepository;
+    private final FacilityRepository facilityRepository;
+    private final CampusEventRepository campusEventRepository;
+    
     /**
      * Get student dashboard welcome data.
      * 
@@ -38,17 +47,22 @@ public class StudentDashboardController {
     @GetMapping("/welcome")
     @PreAuthorize("hasRole('STUDENT') or hasRole('ADMIN')")
     public ResponseEntity<StudentDashboardResponse> getWelcomeData(
-            @AuthenticationPrincipal UserDetails userDetails
+            @AuthenticationPrincipal User userDetails
     ) {
-        log.info("Student dashboard welcome request from user: {}", userDetails.getUsername());
+        log.info("Student dashboard welcome request from user: {}", userDetails.getName());
         
-        // Placeholder response until dashboard services are wired in.
+        long activeBookings = bookingRepository.findAllDetailedByUser(userDetails).size();
+        long reportedIncidents = incidentRepository.findByReporterOrderByCreatedAtDesc(userDetails).size();
+        long availableFacilities = facilityRepository.count();
+        long campusEvents = campusEventRepository.count();
+        
         StudentDashboardResponse response = StudentDashboardResponse.builder()
                 .message("Welcome to your Student Dashboard!")
-                .studentName(userDetails.getUsername())
-                .activeBookings(0)
-                .reportedIncidents(0)
-                .availableFacilities(0)
+                .studentName(userDetails.getName())
+                .activeBookings((int) activeBookings)
+                .reportedIncidents((int) reportedIncidents)
+                .availableFacilities((int) availableFacilities)
+                .campusEvents((int) campusEvents)
                 .build();
         
         return ResponseEntity.ok(response);
@@ -65,12 +79,12 @@ public class StudentDashboardController {
     @GetMapping("/bookings/summary")
     @PreAuthorize("hasRole('STUDENT') or hasRole('ADMIN')")
     public ResponseEntity<String> getBookingsSummary(
-            @AuthenticationPrincipal UserDetails userDetails
+            @AuthenticationPrincipal User userDetails
     ) {
-        log.info("Bookings summary request from user: {}", userDetails.getUsername());
+        log.info("Bookings summary request from user: {}", userDetails.getName());
         
         // Placeholder response until booking services are wired in.
-        return ResponseEntity.ok("Bookings summary for: " + userDetails.getUsername());
+        return ResponseEntity.ok("Bookings summary for: " + userDetails.getName());
     }
     
     /**
@@ -84,11 +98,11 @@ public class StudentDashboardController {
     @GetMapping("/incidents/summary")
     @PreAuthorize("hasRole('STUDENT') or hasRole('ADMIN')")
     public ResponseEntity<String> getIncidentsSummary(
-            @AuthenticationPrincipal UserDetails userDetails
+            @AuthenticationPrincipal User userDetails
     ) {
-        log.info("Incidents summary request from user: {}", userDetails.getUsername());
+        log.info("Incidents summary request from user: {}", userDetails.getName());
         
         // Placeholder response until incident services are wired in.
-        return ResponseEntity.ok("Incidents summary for: " + userDetails.getUsername());
+        return ResponseEntity.ok("Incidents summary for: " + userDetails.getName());
     }
 }

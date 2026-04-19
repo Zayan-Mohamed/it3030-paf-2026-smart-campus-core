@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { 
@@ -11,16 +12,33 @@ import {
   Lightbulb,
 } from 'lucide-react';
 import '../styles/Dashboard.css';
+import { StudentDashboardService } from '../services/StudentDashboardService';
+import type { StudentDashboardData } from '../services/StudentDashboardService';
 
 export const StudentDashboard = () => {
   const { user } = useAuth();
+  const [data, setData] = useState<StudentDashboardData | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  // TODO: Fetch real stats from API
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const dashboardData = await StudentDashboardService.getDashboardData();
+        setData(dashboardData);
+      } catch (error) {
+        console.error('Error fetching student dashboard stats:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchStats();
+  }, []);
+
   const stats = [
-    { title: 'Active Bookings', value: '0', icon: Calendar, color: '#0891b2', change: 'Loading...' },
-    { title: 'Open Incidents', value: '0', icon: AlertTriangle, color: '#f59e0b', change: 'Loading...' },
-    { title: 'Available Facilities', value: '0', icon: Building2, color: '#10b981', change: 'Loading...' },
-    { title: 'Campus Events', value: '0', icon: PartyPopper, color: '#8b5cf6', change: 'Loading...' },
+    { title: 'Active Bookings', value: loading ? '...' : data?.activeBookings?.toString() || '0', icon: Calendar, color: '#0891b2', change: loading ? 'Loading...' : 'Total bookings' },
+    { title: 'Reported Incidents', value: loading ? '...' : data?.reportedIncidents?.toString() || '0', icon: AlertTriangle, color: '#f59e0b', change: loading ? 'Loading...' : 'Total reported' },
+    { title: 'Available Facilities', value: loading ? '...' : data?.availableFacilities?.toString() || '0', icon: Building2, color: '#10b981', change: loading ? 'Loading...' : 'Ready to book' },
+    { title: 'Campus Events', value: loading ? '...' : data?.campusEvents?.toString() || '0', icon: PartyPopper, color: '#8b5cf6', change: loading ? 'Loading...' : 'Upcoming events' },
   ];
 
   const quickActions = [

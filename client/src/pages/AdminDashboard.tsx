@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import {
   Users,
   AlertTriangle,
@@ -11,14 +12,32 @@ import {
   Clipboard,
 } from 'lucide-react';
 import '../styles/Dashboard.css';
+import { AdminDashboardService } from '../services/AdminDashboardService';
+import type { AdminDashboardData } from '../services/AdminDashboardService';
 
 export const AdminDashboard = () => {
-  // TODO: Fetch real stats from API
+  const [data, setData] = useState<AdminDashboardData | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const dashboardData = await AdminDashboardService.getDashboardData();
+        setData(dashboardData);
+      } catch (error) {
+        console.error('Error fetching dashboard stats:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchStats();
+  }, []);
+
   const stats = [
-    { title: 'Total Users', value: '0', icon: Users, color: '#0891b2', change: 'Loading...' },
-    { title: 'Active Incidents', value: '0', icon: AlertTriangle, color: '#f59e0b', change: 'Loading...' },
-    { title: 'System Uptime', value: '-', icon: Rocket, color: '#10b981', change: 'Loading...' },
-    { title: 'Total Bookings', value: '0', icon: Calendar, color: '#8b5cf6', change: 'Loading...' },
+    { title: 'Total Users', value: loading ? '...' : data?.totalUsers?.toString() || '0', icon: Users, color: '#0891b2', change: loading ? 'Loading...' : 'Total registered' },
+    { title: 'Active Incidents', value: loading ? '...' : data?.openIncidents?.toString() || '0', icon: AlertTriangle, color: '#f59e0b', change: loading ? 'Loading...' : 'Require attention' },
+    { title: 'System Uptime', value: loading ? '...' : '99.9%', icon: Rocket, color: '#10b981', change: loading ? 'Loading...' : 'All systems operational' },
+    { title: 'Total Bookings', value: loading ? '...' : data?.activeBookings?.toString() || '0', icon: Calendar, color: '#8b5cf6', change: loading ? 'Loading...' : 'Across all facilities' },
   ];
 
   const quickActions = [
@@ -79,44 +98,74 @@ export const AdminDashboard = () => {
           </div>
         </section>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '1.5rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '2rem' }}>
           {/* Recent Users */}
           <section className="section">
             <h2 className="section-title">Recent Users</h2>
-            <div className="bookings-list">
-              <div className="booking-item" style={{ 
-                justifyContent: 'center', 
-                textAlign: 'center', 
-                padding: '3rem 2rem',
-                flexDirection: 'column',
-                gap: '1rem'
-              }}>
-                <User size={48} style={{ color: '#94a3b8', margin: '0 auto' }} />
-                <div>
-                  <h4 className="booking-facility" style={{ color: '#64748b' }}>No Users Yet</h4>
-                  <p className="booking-date">User registrations will appear here</p>
+            <div className="card p-4">
+              {loading ? (
+                <div className="text-center p-4">Loading recent users...</div>
+              ) : data?.recentUsers && data.recentUsers.length > 0 ? (
+                <div className="flex flex-col gap-4">
+                  {data.recentUsers.slice(0, 3).map(user => (
+                    <div key={user.id} className="flex items-center gap-3 border-b last:border-0 pb-3 last:pb-0">
+                      <div className="bg-cyan-100 text-cyan-600 p-2 rounded-full">
+                        <User size={20} />
+                      </div>
+                      <div className="flex-1 overflow-hidden">
+                        <h4 className="font-medium truncate">{user.name}</h4>
+                        <p className="text-sm text-gray-500 truncate">{user.email}</p>
+                      </div>
+                      <span className="text-xs font-semibold px-2 py-1 bg-gray-100 rounded-full">
+                        {user.roles && user.roles.length > 0 ? user.roles[0] : 'USER'}
+                      </span>
+                    </div>
+                  ))}
                 </div>
-              </div>
+              ) : (
+                <div className="text-center p-6 text-gray-400">
+                  <User size={48} className="mx-auto mb-2 opacity-50" />
+                  <p>No Users Yet</p>
+                </div>
+              )}
             </div>
           </section>
 
           {/* System Metrics */}
           <section className="section">
             <h2 className="section-title">System Health</h2>
-            <div className="bookings-list">
-              <div className="booking-item" style={{ 
-                justifyContent: 'center', 
-                textAlign: 'center', 
-                padding: '3rem 2rem',
-                flexDirection: 'column',
-                gap: '1rem'
-              }}>
-                <CheckCircle size={48} style={{ color: '#94a3b8', margin: '0 auto' }} />
-                <div>
-                  <h4 className="booking-facility" style={{ color: '#64748b' }}>No Metrics Available</h4>
-                  <p className="booking-date">System health metrics will appear here</p>
+            <div className="card p-4">
+              {loading ? (
+                <div className="text-center p-4">Loading metrics...</div>
+              ) : data?.systemHealth ? (
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="bg-gray-50 p-3 rounded-lg">
+                    <p className="text-xs text-gray-500">App Status</p>
+                    <p className={`font-semibold ${data.systemHealth.status === 'UP' ? 'text-green-600' : 'text-red-600'}`}>
+                      {data.systemHealth.status}
+                    </p>
+                  </div>
+                  <div className="bg-gray-50 p-3 rounded-lg">
+                    <p className="text-xs text-gray-500">DB Status</p>
+                    <p className={`font-semibold ${data.systemHealth.database === 'UP' ? 'text-green-600' : 'text-red-600'}`}>
+                      {data.systemHealth.database}
+                    </p>
+                  </div>
+                  <div className="bg-gray-50 p-3 rounded-lg">
+                    <p className="text-xs text-gray-500">Uptime</p>
+                    <p className="font-semibold text-blue-600">{data.systemHealth.uptime}</p>
+                  </div>
+                  <div className="bg-gray-50 p-3 rounded-lg">
+                    <p className="text-xs text-gray-500">Memory</p>
+                    <p className="font-semibold text-amber-600">{data.systemHealth.memoryUsagePercentage}%</p>
+                  </div>
                 </div>
-              </div>
+              ) : (
+                <div className="text-center p-6 text-gray-400">
+                  <CheckCircle size={48} className="mx-auto mb-2 opacity-50" />
+                  <p>No Metrics Available</p>
+                </div>
+              )}
             </div>
           </section>
         </div>

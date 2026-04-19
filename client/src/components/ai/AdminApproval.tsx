@@ -164,11 +164,11 @@ export function AdminApproval() {
   };
 
   return (
-    <div className="flex justify-center w-full max-w-2xl h-[600px]">
+    <div className="flex w-full h-full bg-white">
       {/* Student View Pane */}
       {!isAdminOrStaff && (
-        <div className="flex flex-col flex-1 bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden h-full w-full">
-          <div className="bg-indigo-600 p-4 text-white flex items-center justify-between">
+        <div className="flex flex-col flex-1 h-full w-full">
+          <div className="bg-indigo-600 p-4 text-white flex items-center justify-between shrink-0">
             <div className="flex items-center space-x-3">
               <User className="w-6 h-6" />
               <div>
@@ -227,8 +227,8 @@ export function AdminApproval() {
 
       {/* Admin Dashboard Pane */}
       {isAdminOrStaff && (
-        <div className="flex flex-col flex-1 bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden h-full w-full">
-          <div className="bg-slate-800 p-4 text-white flex items-center justify-between">
+        <div className="flex flex-col flex-1 h-full w-full">
+          <div className="bg-slate-800 p-4 text-white flex items-center justify-between shrink-0">
             <div className="flex items-center space-x-3">
               <Shield className="w-6 h-6 text-slate-300" />
               <div>
