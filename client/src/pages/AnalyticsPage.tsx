@@ -37,10 +37,10 @@ interface AnalyticsData {
     resolutionTrend?: string;
     resolutionPositive?: boolean;
   };
-  bookingTrends?: any[];
-  facilityPopularity?: any[];
-  incidentTrends?: any[];
-  systemPeakUsage?: any[];
+  bookingTrends?: Record<string, unknown>[];
+  facilityPopularity?: Record<string, unknown>[];
+  incidentTrends?: Record<string, unknown>[];
+  systemPeakUsage?: Record<string, unknown>[];
 }
 
 export const AnalyticsPage = () => {
