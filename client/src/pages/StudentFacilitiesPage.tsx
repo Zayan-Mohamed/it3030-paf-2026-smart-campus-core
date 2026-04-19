@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import type { FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { Search } from 'lucide-react';
@@ -44,7 +44,7 @@ export const StudentFacilitiesPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const loadFacilities = async (nextFilters: FilterState) => {
+  const loadFacilities = useCallback(async (nextFilters: FilterState) => {
     if (!token) {
       setFacilities([]);
       setError('You must be signed in to view facilities.');
@@ -64,11 +64,11 @@ export const StudentFacilitiesPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [token]);
 
   useEffect(() => {
     void loadFacilities(initialFilters);
-  }, [token]);
+  }, [loadFacilities]);
 
   const handleFilterChange = (field: keyof FilterState, value: string) => {
     setFilters((current) => ({

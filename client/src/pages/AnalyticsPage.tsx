@@ -16,15 +16,36 @@ import {
   AreaChart,
   Area
 } from 'recharts';
-import { Download, Calendar, Filter } from 'lucide-react';
+import { Download, Filter } from 'lucide-react';
 import '../styles/Dashboard.css';
 import api from '../lib/api';
 
 const COLORS = ['#0891b2', '#10b981', '#f59e0b', '#8b5cf6', '#ef4444'];
 
+interface AnalyticsData {
+  kpis?: {
+    totalUsers?: string;
+    usersTrend?: string;
+    usersPositive?: boolean;
+    totalFacilities?: string;
+    facilitiesTrend?: string;
+    facilitiesPositive?: boolean;
+    monthlyBookings?: string;
+    bookingsTrend?: string;
+    bookingsPositive?: boolean;
+    avgResolutionTime?: string;
+    resolutionTrend?: string;
+    resolutionPositive?: boolean;
+  };
+  bookingTrends?: any[];
+  facilityPopularity?: any[];
+  incidentTrends?: any[];
+  systemPeakUsage?: any[];
+}
+
 export const AnalyticsPage = () => {
   const [timeRange, setTimeRange] = useState('6M');
-  const [data, setData] = useState<any>(null);
+  const [data, setData] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -80,7 +101,7 @@ export const AnalyticsPage = () => {
 
   return (
     <div className="dashboard-layout">
-      <main className="dashboard-main p-6 overflow-y-auto w-full">
+      <main className="dashboard-main p-6 w-full">
         <div className="flex justify-between items-end mb-8 border-b pb-4">
           <div>
             <h1 className="text-3xl font-bold text-gray-800">Analytics & Reports</h1>
@@ -166,7 +187,7 @@ export const AnalyticsPage = () => {
                       fill="#8884d8"
                       dataKey="value"
                     >
-                      {data.facilityPopularity.map((_: any, index: number) => (
+                      {(data.facilityPopularity || []).map((_: unknown, index: number) => (
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                       ))}
                     </Pie>

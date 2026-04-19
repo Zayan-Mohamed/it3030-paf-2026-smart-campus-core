@@ -36,7 +36,7 @@ export const AdminDashboard = () => {
   const stats = [
     { title: 'Total Users', value: loading ? '...' : data?.totalUsers?.toString() || '0', icon: Users, color: '#0891b2', change: loading ? 'Loading...' : 'Total registered' },
     { title: 'Active Incidents', value: loading ? '...' : data?.openIncidents?.toString() || '0', icon: AlertTriangle, color: '#f59e0b', change: loading ? 'Loading...' : 'Require attention' },
-    { title: 'System Uptime', value: loading ? '...' : '99.9%', icon: Rocket, color: '#10b981', change: loading ? 'Loading...' : 'All systems operational' },
+    { title: 'System Uptime', value: loading ? '...' : data?.systemHealth?.uptime || 'N/A', icon: Rocket, color: '#10b981', change: loading ? 'Loading...' : 'All systems operational' },
     { title: 'Total Bookings', value: loading ? '...' : data?.activeBookings?.toString() || '0', icon: Calendar, color: '#8b5cf6', change: loading ? 'Loading...' : 'Across all facilities' },
   ];
 

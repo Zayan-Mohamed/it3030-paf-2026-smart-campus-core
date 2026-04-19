@@ -176,7 +176,7 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
                 clientRef.current.deactivate();
             }
         };
-    }, [token, user]);
+    }, [token, user, notificationsAvailable]);
 
     /**
      * Fetch initial notifications on mount

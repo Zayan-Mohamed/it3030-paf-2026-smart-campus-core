@@ -15,7 +15,7 @@ export const api = {
     if (!response.ok) throw new Error('API Request failed');
     try { return { data: await response.json() }; } catch { return { data: null }; }
   },
-  post: async (url: string, data?: any) => {
+  post: async (url: string, data?: unknown) => {
     const response = await fetch(`${API_BASE_URL}${url}`, {
       method: 'POST',
       headers: getHeaders(),
@@ -24,7 +24,7 @@ export const api = {
     if (!response.ok) throw new Error('API Request failed');
     try { return { data: await response.json() }; } catch { return { data: null }; }
   },
-  put: async (url: string, data?: any) => {
+  put: async (url: string, data?: unknown) => {
     const response = await fetch(`${API_BASE_URL}${url}`, {
       method: 'PUT',
       headers: getHeaders(),

@@ -19,11 +19,53 @@ export default function CampusEventsPage() {
   const { register: registerSquad, handleSubmit: handleSquadSubmit, reset: resetSquad } = useForm();
   const { register: registerEvent, handleSubmit: handleEventSubmit, reset: resetEvent } = useForm();
   
-  const fetchEvents = async () => {
+  useEffect(() => {
+    let mounted = true;
+    const fetchEvents = async () => {
+      try {
+        const response = await api.get('/api/events');
+        if (!mounted) return;
+        if (response.data.length === 0) {
+          // Provide mock data if empty for demo purposes
+          setEvents([
+            {
+              id: 998,
+              title: 'Spring 2026 Hackathon',
+              description: 'Join us for a 48-hour coding marathon!',
+              eventDate: '2026-05-10T10:00:00',
+              lfgEnabled: true,
+              eventType: 'HACKATHON',
+              creator: { id: 1, username: 'Admin', email: 'admin@test.com' },
+              createdAt: new Date().toISOString(),
+              externalFormUrl: 'https://forms.gle/hackathon'
+            },
+            {
+              id: 999,
+              title: 'Final Year Project 2026 Grouping',
+              description: 'Find your FYP team for the next academic year.',
+              eventDate: '2026-08-01T00:00:00',
+              lfgEnabled: true,
+              eventType: 'FINAL_YEAR_PROJECT',
+              creator: { id: 1, username: 'Admin', email: 'admin@test.com' },
+              createdAt: new Date().toISOString()
+            }
+          ]);
+        } else {
+          setEvents(response.data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch events', error);
+      }
+    };
+    
+    void fetchEvents();
+    return () => { mounted = false; };
+  }, []);
+
+  const fetchEventsDirect = async () => {
     try {
       const response = await api.get('/api/events');
       if (response.data.length === 0) {
-        // Provide mock data if empty for demo purposes
         setEvents([
           {
             id: 998,
@@ -55,11 +97,7 @@ export default function CampusEventsPage() {
     }
   };
 
-  useEffect(() => {
-    fetchEvents();
-  }, []);
-
-  const onCreateEventSubmit = async (data: any) => {
+  const onCreateEventSubmit = async (data: Record<string, unknown>) => {
     try {
       const payload = {
         ...data,
@@ -68,7 +106,7 @@ export default function CampusEventsPage() {
       await api.post('/api/events', payload);
       setIsCreateModalOpen(false);
       resetEvent();
-      fetchEvents();
+      void fetchEventsDirect();
     } catch (error) {
       console.error('Failed to create event', error);
     }
@@ -91,7 +129,7 @@ export default function CampusEventsPage() {
     }
   };
 
-  const onSquadSubmit = async (data: any) => {
+  const onSquadSubmit = async (data: Record<string, string>) => {
     if (!selectedEvent) return;
     try {
       const payload = {
@@ -112,15 +150,15 @@ export default function CampusEventsPage() {
       await api.post(`/api/events/${selectedEvent.id}/squads/${squadId}/join`);
       fetchSquads(selectedEvent.id);
       alert('Join request sent! Waiting for creator approval.');
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Failed to join squad', error);
-      alert(error.response?.data?.message || 'Failed to request join. You might already be in a squad for this event.');
+      alert((error as {response?: {data?: {message?: string}}}).response?.data?.message || 'Failed to request join. You might already be in a squad for this event.');
     }
   };
 
   const [editingSquad, setEditingSquad] = useState<EventSquad | null>(null);
   
-  const handleEditSquadSubmit = async (data: any) => {
+  const handleEditSquadSubmit = async (data: Record<string, string>) => {
     if (!selectedEvent || !editingSquad) return;
     try {
       const payload = {
@@ -130,9 +168,9 @@ export default function CampusEventsPage() {
       await api.put(`/api/events/${selectedEvent.id}/squads/${editingSquad.id}`, payload);
       setEditingSquad(null);
       fetchSquads(selectedEvent.id);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Failed to update squad', error);
-      alert(error.response?.data?.message || 'Failed to update squad.');
+      alert((error as {response?: {data?: {message?: string}}}).response?.data?.message || 'Failed to update squad.');
     }
   };
 
@@ -142,9 +180,9 @@ export default function CampusEventsPage() {
     try {
       await api.delete(`/api/events/${selectedEvent.id}/squads/${squadId}`);
       fetchSquads(selectedEvent.id);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Failed to delete squad', error);
-      alert(error.response?.data?.message || 'Failed to delete squad.');
+      alert((error as {response?: {data?: {message?: string}}}).response?.data?.message || 'Failed to delete squad.');
     }
   };
 
@@ -154,9 +192,9 @@ export default function CampusEventsPage() {
     try {
       await api.post(`/api/events/${selectedEvent.id}/squads/${squadId}/leave`);
       fetchSquads(selectedEvent.id);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Failed to leave squad', error);
-      alert(error.response?.data?.message || 'Failed to leave squad.');
+      alert((error as {response?: {data?: {message?: string}}}).response?.data?.message || 'Failed to leave squad.');
     }
   };
 
@@ -165,9 +203,9 @@ export default function CampusEventsPage() {
     try {
       await api.post(`/api/events/${selectedEvent.id}/squads/${squadId}/approve/${userId}`);
       fetchSquads(selectedEvent.id);
-    } catch (error: any) {
-      console.error('Failed to approve join', error);
-      alert(error.response?.data?.message || 'Failed to approve join request.');
+    } catch (error: unknown) {
+      console.error('Failed to update request', error);
+      alert((error as {response?: {data?: {message?: string}}}).response?.data?.message || 'Failed to update request.');
     }
   };
 
