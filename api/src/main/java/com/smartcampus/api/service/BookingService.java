@@ -46,6 +46,12 @@ public class BookingService {
                 ? bookingRepository.findAllDetailed()
                 : bookingRepository.findAllDetailedByUser(currentUser);
 
+        if (isStaffOnly(currentUser)) {
+            bookings = bookings.stream()
+                .filter(booking -> booking.getUser().hasRole(Role.STAFF))
+                .toList();
+        }
+
         return bookings.stream()
                 .filter(booking -> status == null || booking.getStatus() == status)
                 .filter(booking -> facilityId == null || booking.getFacility().getId().equals(facilityId))
@@ -335,6 +341,10 @@ public class BookingService {
 
     private boolean isPrivileged(User user) {
         return user.hasRole(Role.ADMIN) || user.hasRole(Role.STAFF);
+    }
+
+    private boolean isStaffOnly(User user) {
+        return user.hasRole(Role.STAFF) && !user.hasRole(Role.ADMIN);
     }
 
     private boolean canSeeOwnerName(User user) {

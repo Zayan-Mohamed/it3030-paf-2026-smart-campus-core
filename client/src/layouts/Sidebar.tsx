@@ -127,6 +127,10 @@ export const Sidebar = () => {
               <span className="nav-icon"><Calendar size={20} /></span>
               {sidebarOpen && <span>My Schedule</span>}
             </Link>
+            <Link to="/dashboard/staff/bookings" className={cn("nav-item", checkActive('/dashboard/staff/bookings') && "active") }>
+              <span className="nav-icon"><Calendar size={20} /></span>
+              {sidebarOpen && <span>Staff Booking</span>}
+            </Link>
             <Link to="/reports" className={cn("nav-item", checkActive('/reports') && "active")}>
               <span className="nav-icon"><BarChart3 size={20} /></span>
               {sidebarOpen && <span>Reports</span>}

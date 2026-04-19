@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { FormEvent } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import {
   AlertCircle,
   CalendarDays,
@@ -43,6 +44,25 @@ const initialForm: FormState = {
 
 const API_BASE_URL = 'http://localhost:8080';
 
+const STAFF_BOOKING_FACILITY_TYPES = new Set([
+  'LECTURE_HALL',
+  'CONFERENCE_ROOM',
+  'COMPUTER_LAB',
+  'STAFF_ROOM',
+  'MEETING_ROOM',
+  'OTHER',
+]);
+
+const STUDENT_BOOKING_FACILITY_TYPES = new Set([
+  'CONFERENCE_ROOM',
+  'SPORTS_HALL',
+  'AUDITORIUM',
+  'STUDY_ROOM',
+  'BYOD_COMPUTER_LAB',
+  'PRACTICAL_ROOM',
+  'OTHER',
+]);
+
 const optionLabel = (value: string) => value.replaceAll('_', ' ');
 
 const uniqueOptions = (values: string[]) => [...new Set(values)].sort((first, second) => first.localeCompare(second));
@@ -72,9 +92,12 @@ async function fetchFacilities(token: string): Promise<Facility[]> {
 
 export const BookingFormPage = () => {
   const { token } = useAuth();
+  const location = useLocation();
   const navigate = useNavigate();
   const { bookingId } = useParams<{ bookingId: string }>();
   const isEditMode = Boolean(bookingId);
+  const isStaffBookingRoute = location.pathname.startsWith('/dashboard/staff/bookings');
+  const isStudentBookingRoute = location.pathname.startsWith('/dashboard/student/bookings') || location.pathname.startsWith('/bookings');
   const [facilities, setFacilities] = useState<Facility[]>([]);
   const [form, setForm] = useState<FormState>(initialForm);
   const [loading, setLoading] = useState(true);
@@ -170,15 +193,34 @@ export const BookingFormPage = () => {
     setError(null);
   };
 
-  const facilitiesForSelectedName = selectedName
-    ? facilities.filter((facility) => facility.name === selectedName)
+  const facilitiesForRoute = isStaffBookingRoute
+    ? facilities.filter((facility) => STAFF_BOOKING_FACILITY_TYPES.has(facility.facilityType))
+    : isStudentBookingRoute
+      ? facilities.filter((facility) => STUDENT_BOOKING_FACILITY_TYPES.has(facility.facilityType))
     : facilities;
+
+  const selectedFacility = isEditMode && form.facilityId
+    ? facilities.find((facility) => String(facility.id) === form.facilityId)
+    : null;
+
+  const facilitiesForDropdowns = selectedFacility && !facilitiesForRoute.some((facility) => facility.id === selectedFacility.id)
+    ? [...facilitiesForRoute, selectedFacility]
+    : facilitiesForRoute;
+
+  const facilitiesForSelectedName = selectedName
+    ? facilitiesForDropdowns.filter((facility) => facility.name === selectedName)
+    : facilitiesForDropdowns;
 
   const facilitiesForSelectedType = selectedType
     ? facilitiesForSelectedName.filter((facility) => facility.facilityType === selectedType)
     : facilitiesForSelectedName;
 
-  const nameOptions = uniqueOptions(facilities.map((facility) => facility.name));
+  const nameOptions = uniqueOptions(
+    (selectedType
+      ? facilitiesForDropdowns.filter((facility) => facility.facilityType === selectedType)
+      : [])
+      .map((facility) => facility.name)
+  );
   const typeOptions = uniqueOptions(facilitiesForSelectedName.map((facility) => facility.facilityType));
   const locationOptions = uniqueOptions(facilitiesForSelectedType.map((facility) => facility.location));
 
@@ -188,7 +230,7 @@ export const BookingFormPage = () => {
       return;
     }
 
-    const match = facilities.find(
+    const match = facilitiesForDropdowns.find(
       (facility) => facility.name === name && facility.facilityType === type && facility.location === location
     );
 

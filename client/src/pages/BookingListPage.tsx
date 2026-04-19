@@ -16,6 +16,7 @@ import type { Booking, BookingStatus, Facility } from '../types';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Select } from '../components/ui/select';
+import { useLocation } from 'react-router-dom';
 import '../styles/Dashboard.css';
 
 const bookingStatuses: Array<{ value: BookingStatus | ''; label: string }> = [
@@ -42,6 +43,9 @@ const dateFilterLabel = (value: string) => {
 
 export const BookingListPage = () => {
   const { token } = useAuth();
+  const location = useLocation();
+  const isStaffBookingRoute = location.pathname.startsWith('/dashboard/staff/bookings');
+  const bookingBasePath = isStaffBookingRoute ? '/dashboard/staff/bookings' : '/bookings';
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [facilities, setFacilities] = useState<Facility[]>([]);
   const [statusFilter, setStatusFilter] = useState<BookingStatus | ''>('');
@@ -154,7 +158,9 @@ export const BookingListPage = () => {
         <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
           <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
             <div>
-              <h1 className="text-3xl font-semibold tracking-tight text-slate-900">Booking List</h1>
+              <h1 className="text-3xl font-semibold tracking-tight text-slate-900">
+                {isStaffBookingRoute ? 'Staff Booking List' : 'Booking List'}
+              </h1>
             </div>
             <div className="flex flex-wrap gap-3">
               <Link to="/bookings/calendar">
@@ -163,7 +169,7 @@ export const BookingListPage = () => {
                   Calendar
                 </Button>
               </Link>
-              <Link to="/bookings/new">
+              <Link to={`${bookingBasePath}/new`}>
                 <Button>
                   <Plus className="mr-2 h-4 w-4" />
                   New Booking
@@ -265,11 +271,26 @@ export const BookingListPage = () => {
                           <p><span className="font-medium text-slate-700">Attendees:</span> {booking.numberOfAttendees}</p>
                           <p><span className="font-medium text-slate-700">Start:</span> {formatDateTime(booking.startTime)}</p>
                           <p><span className="font-medium text-slate-700">End:</span> {formatDateTime(booking.endTime)}</p>
+                          {isStaffBookingRoute && (
+                            <p><span className="font-medium text-slate-700">Booked by:</span> {booking.userName} ({booking.userEmail})</p>
+                          )}
                         </div>
 
                         <p className="text-sm text-slate-600">
                           <span className="font-medium text-slate-700">Purpose:</span> {booking.purpose}
                         </p>
+
+                        {isStaffBookingRoute && booking.reviewedByName && (
+                          <p className="text-sm text-slate-600">
+                            <span className="font-medium text-slate-700">Reviewed by:</span> {booking.reviewedByName}
+                          </p>
+                        )}
+
+                        {isStaffBookingRoute && booking.cancelledByName && (
+                          <p className="text-sm text-slate-600">
+                            <span className="font-medium text-slate-700">Cancelled by:</span> {booking.cancelledByName}
+                          </p>
+                        )}
 
                         {booking.staffComments && (
                           <div className="rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm text-slate-700">
