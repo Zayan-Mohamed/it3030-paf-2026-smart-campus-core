@@ -87,7 +87,7 @@ public class FacilityDataInitializer {
                     Facility.builder()
                             .name("Robotics Lab")
                             .description("Specialized lab equipped for electronics and robotics practical work.")
-                            .facilityType(Facility.FacilityType.LABORATORY)
+                            .facilityType(Facility.FacilityType.PRACTICAL_ROOM)
                             .location("Technology Block - Floor 1")
                             .capacity(24)
                             .status(Facility.FacilityStatus.AVAILABLE)

@@ -132,6 +132,7 @@ ticket-flow
 
               <Route element={<ProtectedRoute allowedRoles={['STAFF', 'ADMIN']} />}>
                 <Route path="/dashboard/staff" element={<StaffDashboard />} />
+                <Route path="/dashboard/staff/bookings" element={<BookingListPage />} />
                 <Route path="/incidents/queue" element={
                   <main className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
                     <IncidentQueuePage />

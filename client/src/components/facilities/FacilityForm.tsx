@@ -32,11 +32,17 @@ type FacilityFormErrors = Partial<Record<keyof FacilityFormState, string>>;
 
 const facilityTypes: FacilityType[] = [
   'CONFERENCE_ROOM',
-  'LABORATORY',
   'SPORTS_HALL',
   'AUDITORIUM',
   'STUDY_ROOM',
+  'BYOD_COMPUTER_LAB',
+  'PRACTICAL_ROOM',
   'COMPUTER_LAB',
+  'PROJECTOR',
+  'CAMERA',
+  'STAFF_ROOM',
+  'MEETING_ROOM',
+  'LECTURE_HALL',
   'OTHER',
 ];
 

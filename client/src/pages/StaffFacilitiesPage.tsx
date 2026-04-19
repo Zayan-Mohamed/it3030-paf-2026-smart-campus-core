@@ -125,11 +125,11 @@ export const StaffFacilitiesPage = () => {
                 >
                   <option value="">All types</option>
                   <option value="CONFERENCE_ROOM">CONFERENCE ROOM</option>
-                  <option value="LABORATORY">LABORATORY</option>
-                  <option value="SPORTS_HALL">SPORTS HALL</option>
                   <option value="AUDITORIUM">AUDITORIUM</option>
-                  <option value="STUDY_ROOM">STUDY ROOM</option>
+                  <option value="LECTURE_HALL">LECTURE HALL</option>
                   <option value="COMPUTER_LAB">COMPUTER LAB</option>
+                  <option value="STAFF_ROOM">STAFF ROOM</option>
+                  <option value="MEETING_ROOM">MEETING ROOM</option>
                   <option value="OTHER">OTHER</option>
                 </select>
               </label>

@@ -18,11 +18,17 @@ export interface User {
 
 export type FacilityType =
   | 'CONFERENCE_ROOM'
-  | 'LABORATORY'
   | 'SPORTS_HALL'
   | 'AUDITORIUM'
   | 'STUDY_ROOM'
+  | 'BYOD_COMPUTER_LAB'
+  | 'PRACTICAL_ROOM'
   | 'COMPUTER_LAB'
+  | 'PROJECTOR'
+  | 'CAMERA'
+  | 'STAFF_ROOM'
+  | 'MEETING_ROOM'
+  | 'LECTURE_HALL'
   | 'OTHER';
 
 export type FacilityStatus = 'AVAILABLE' | 'UNDER_MAINTENANCE' | 'UNAVAILABLE';
