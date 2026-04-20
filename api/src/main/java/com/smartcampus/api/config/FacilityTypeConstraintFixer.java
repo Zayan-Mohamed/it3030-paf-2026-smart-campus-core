@@ -29,11 +29,11 @@ public class FacilityTypeConstraintFixer {
                         FROM information_schema.tables
                         WHERE table_schema = 'public' AND table_name = 'facilities'
                     ) THEN
+                        ALTER TABLE facilities DROP CONSTRAINT IF EXISTS facilities_facility_type_check;
+
                         UPDATE facilities
                         SET facility_type = 'PRACTICAL_ROOM'
                         WHERE facility_type = 'LABORATORY';
-
-                        ALTER TABLE facilities DROP CONSTRAINT IF EXISTS facilities_facility_type_check;
 
                         ALTER TABLE facilities
                         ADD CONSTRAINT facilities_facility_type_check

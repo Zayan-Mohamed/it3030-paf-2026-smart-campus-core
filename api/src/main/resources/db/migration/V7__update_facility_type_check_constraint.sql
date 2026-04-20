@@ -1,11 +1,11 @@
 -- Align facilities facility_type DB check constraint with current FacilityType enum values.
 -- Also normalize legacy value if present.
 
+ALTER TABLE facilities DROP CONSTRAINT IF EXISTS facilities_facility_type_check;
+
 UPDATE facilities
 SET facility_type = 'PRACTICAL_ROOM'
 WHERE facility_type = 'LABORATORY';
-
-ALTER TABLE facilities DROP CONSTRAINT IF EXISTS facilities_facility_type_check;
 
 ALTER TABLE facilities
 ADD CONSTRAINT facilities_facility_type_check
