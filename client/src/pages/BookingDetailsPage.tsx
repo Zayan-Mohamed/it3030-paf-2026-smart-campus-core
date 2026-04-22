@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import {
   AlertCircle,
   ArrowLeft,
@@ -19,8 +20,11 @@ import '../styles/Dashboard.css';
 
 export const BookingDetailsPage = () => {
   const { token } = useAuth();
+  const location = useLocation();
   const navigate = useNavigate();
   const { bookingId } = useParams<{ bookingId: string }>();
+  const isStaffBookingRoute = location.pathname.startsWith('/dashboard/staff/bookings');
+  const bookingBasePath = isStaffBookingRoute ? '/dashboard/staff/bookings' : '/bookings';
   const [booking, setBooking] = useState<Booking | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -57,7 +61,7 @@ export const BookingDetailsPage = () => {
     try {
       setSubmitting(true);
       await deleteBooking(token, booking.id);
-      navigate('/bookings');
+      navigate(bookingBasePath);
     } catch (actionError) {
       setError(actionError instanceof Error ? actionError.message : 'Failed to delete booking.');
     } finally {
@@ -114,7 +118,7 @@ export const BookingDetailsPage = () => {
         <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
           <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
-              <Link to="/bookings" className="mb-3 inline-flex items-center gap-2 text-sm font-medium text-cyan-700 hover:text-cyan-800">
+              <Link to={bookingBasePath} className="mb-3 inline-flex items-center gap-2 text-sm font-medium text-cyan-700 hover:text-cyan-800">
                 <ArrowLeft className="h-4 w-4" />
                 Back to bookings
               </Link>
@@ -124,7 +128,7 @@ export const BookingDetailsPage = () => {
 
             <div className="flex flex-wrap gap-3">
               {booking.canEdit && (
-                <Link to={`/bookings/${booking.id}/edit`}>
+                <Link to={`${bookingBasePath}/${booking.id}/edit`}>
                   <Button variant="outline">
                     <Pencil className="mr-2 h-4 w-4" />
                     Edit

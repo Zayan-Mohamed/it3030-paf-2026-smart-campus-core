@@ -103,6 +103,8 @@ export const BookingFormPage = () => {
   const hasStudentRole = Boolean(user?.roles.includes('STUDENT'));
   const isStaffBookingContext = isStaffDashboardRoute || (isSharedBookingRoute && hasStaffRole && !hasStudentRole);
   const isStudentBookingContext = isStudentDashboardRoute || (isSharedBookingRoute && !isStaffBookingContext);
+  const bookingBasePath = isStaffBookingContext ? '/dashboard/staff/bookings' : '/bookings';
+  const bookingCalendarPath = `${bookingBasePath}/calendar`;
   const [facilities, setFacilities] = useState<Facility[]>([]);
   const [form, setForm] = useState<FormState>(initialForm);
   const [loading, setLoading] = useState(true);
@@ -327,7 +329,7 @@ export const BookingFormPage = () => {
 
       window.alert(isEditMode ? 'Booking updated successfully' : 'Booking created successfully');
 
-      navigate(`/bookings/${savedBooking.id}`);
+      navigate(`${bookingBasePath}/${savedBooking.id}`);
     } catch (submitError) {
       setError(submitError instanceof Error ? submitError.message : 'Failed to save booking.');
     } finally {
@@ -355,7 +357,7 @@ export const BookingFormPage = () => {
               </p>
             </div>
 
-            <Link to="/bookings/calendar">
+            <Link to={bookingCalendarPath}>
               <Button variant="outline">
                 <CalendarDays className="mr-2 h-4 w-4" />
                 View Calendar
@@ -529,7 +531,7 @@ export const BookingFormPage = () => {
                 </div>
 
                 <div className="flex flex-wrap justify-end gap-3">
-                  <Link to={isEditMode && bookingId ? `/bookings/${bookingId}` : '/bookings'}>
+                  <Link to={isEditMode && bookingId ? `${bookingBasePath}/${bookingId}` : bookingBasePath}>
                     <Button type="button" variant="outline">Cancel</Button>
                   </Link>
                   <Button type="submit" disabled={submitting || checkingConflicts}>

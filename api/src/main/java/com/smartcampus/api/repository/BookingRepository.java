@@ -57,4 +57,8 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             @Param("facilityId") Long facilityId,
             @Param("from") LocalDateTime from,
             @Param("to") LocalDateTime to);
+
+    @EntityGraph(attributePaths = {"facility", "user", "reviewedBy"})
+    @Query("select b from Booking b where b.status = :status order by b.startTime desc")
+    List<Booking> findByStatus(@Param("status") Booking.BookingStatus status);
 }

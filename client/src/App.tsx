@@ -102,8 +102,11 @@ ticket-flow
                 <Route path="/dashboard/student/bookings/new" element={<BookingFormPage />} />
                 <Route path="/dashboard/staff/bookings/new" element={<BookingFormPage />} />
                 <Route path="/bookings/calendar" element={<BookingCalendarPage />} />
+                <Route path="/dashboard/staff/bookings/calendar" element={<BookingCalendarPage />} />
                 <Route path="/bookings/:bookingId" element={<BookingDetailsPage />} />
+                <Route path="/dashboard/staff/bookings/:bookingId" element={<BookingDetailsPage />} />
                 <Route path="/bookings/:bookingId/edit" element={<BookingFormPage />} />
+                <Route path="/dashboard/staff/bookings/:bookingId/edit" element={<BookingFormPage />} />
               </Route>
 
               {/* Protected Role-Based Dashboards */}
