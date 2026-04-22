@@ -11,7 +11,7 @@ import {
   ChevronRight,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
-import { adminCancelBooking, bookingStatusClasses, bookingStatusLabel, bookingStatusBackgroundColor, formatDateTime, formatTime, getBookings, reviewBooking, isPublicHoliday } from '../lib/bookings';
+import { adminCancelBooking, completeBooking, bookingStatusClasses, bookingStatusLabel, bookingStatusBackgroundColor, formatDateTime, formatTime, getBookings, reviewBooking, isPublicHoliday } from '../lib/bookings';
 import type { Booking, BookingStatus } from '../types';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
@@ -135,6 +135,11 @@ export const ManageBookingsPage = () => {
     return Number.isFinite(reviewedAt) && Date.now() <= reviewedAt + (2 * 60 * 60 * 1000);
   };
 
+  const isCompletionEligible = (booking: Booking) => {
+    const endTime = new Date(booking.endTime).getTime();
+    return Number.isFinite(endTime) && Date.now() >= endTime;
+  };
+
   const handleAdminCancel = async (booking: Booking) => {
     if (!token) {
       return;
@@ -163,6 +168,23 @@ export const ManageBookingsPage = () => {
       await loadBookings();
     } catch (actionError) {
       setError(actionError instanceof Error ? actionError.message : 'Failed to cancel booking.');
+    } finally {
+      setActionId(null);
+    }
+  };
+
+  const handleComplete = async (bookingId: number) => {
+    if (!token || !window.confirm('Mark this booking as completed?')) {
+      return;
+    }
+
+    try {
+      setActionId(bookingId);
+      await completeBooking(token, bookingId);
+      setSuccessMessage('Booking marked as completed successfully.');
+      await loadBookings();
+    } catch (actionError) {
+      setError(actionError instanceof Error ? actionError.message : 'Failed to complete booking.');
     } finally {
       setActionId(null);
     }
@@ -423,7 +445,7 @@ export const ManageBookingsPage = () => {
                                 </span>
                               </div>
                               <p className="text-sm text-slate-600">
-                                <span className="font-medium text-slate-700">Student:</span> {booking.userName}
+                                <span className="font-medium text-slate-700">Booked by:</span> {booking.userName}
                               </p>
                               <p className="text-sm text-slate-600">
                                 <span className="font-medium text-slate-700">Email:</span> {booking.userEmail}
@@ -529,7 +551,7 @@ export const ManageBookingsPage = () => {
                             <div className="space-y-3 rounded-lg border border-rose-200 bg-rose-50 p-4">
                               <div className="flex flex-wrap items-center gap-2 text-sm font-medium text-slate-700">
                                 <Clock3 className="h-4 w-4" />
-                                Approved bookings can be cancelled within 2 hours of approval.
+                                Approved bookings can be cancelled within 2 hours of approval or marked as completed after end time.
                               </div>
 
                               {isCancellationWindowOpen(booking) ? (
@@ -565,6 +587,21 @@ export const ManageBookingsPage = () => {
                                 </>
                               ) : (
                                 <p className="text-sm text-rose-700">The 2-hour cancellation window has expired.</p>
+                              )}
+
+                              {isCompletionEligible(booking) && (
+                                <div className="flex flex-wrap gap-2 border-t border-rose-200 pt-3">
+                                  <Button
+                                    type="button"
+                                    variant="outline"
+                                    onClick={() => void handleComplete(booking.id)}
+                                    disabled={actionId === booking.id}
+                                    className="flex-1 md:flex-none"
+                                  >
+                                    <Check className="mr-2 h-4 w-4" />
+                                    {actionId === booking.id ? 'Processing...' : 'Mark Completed'}
+                                  </Button>
+                                </div>
                               )}
                             </div>
                           )}
@@ -712,7 +749,7 @@ export const ManageBookingsPage = () => {
                             </span>
                           </div>
                           <p className="text-sm text-slate-600">
-                            <span className="font-medium text-slate-700">Student:</span> {booking.userName}
+                            <span className="font-medium text-slate-700">Booked by:</span> {booking.userName}
                           </p>
                           <p className="text-sm text-slate-600">
                             <span className="font-medium text-slate-700">Email:</span> {booking.userEmail}

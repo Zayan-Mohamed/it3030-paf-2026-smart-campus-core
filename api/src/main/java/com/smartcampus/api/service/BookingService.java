@@ -18,17 +18,20 @@ import com.smartcampus.api.event.BookingUpdatedEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.scheduling.annotation.Scheduled;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.logging.Logger;
 
 @Service
 @RequiredArgsConstructor
 public class BookingService {
 
+    private static final Logger logger = Logger.getLogger(BookingService.class.getName());
     private static final EnumSet<Booking.BookingStatus> ACTIVE_CONFLICT_STATUSES = EnumSet.of(
             Booking.BookingStatus.PENDING,
             Booking.BookingStatus.APPROVED);
@@ -203,6 +206,56 @@ public class BookingService {
             reason);
         eventPublisher.publishEvent(new BookingUpdatedEvent(this, saved, booking.getUser(), "ADMIN_CANCELLED", message));
         return mapToResponse(saved, admin);
+    }
+
+    @Transactional
+    public BookingResponse completeBooking(User admin, Long bookingId) {
+        Booking booking = getBookingEntity(bookingId);
+
+        if (!admin.hasRole(Role.ADMIN)) {
+            throw new IllegalArgumentException("Only admins can mark bookings as completed");
+        }
+        if (booking.getStatus() != Booking.BookingStatus.APPROVED) {
+            throw new IllegalArgumentException("Only approved bookings can be marked as completed");
+        }
+        if (booking.getEndTime().isAfter(LocalDateTime.now())) {
+            throw new IllegalArgumentException("Booking can only be marked as completed after its end time has passed");
+        }
+
+        booking.setStatus(Booking.BookingStatus.COMPLETED);
+        Booking saved = bookingRepository.save(booking);
+        String message = String.format("Your booking for %s on %s has been marked as completed.", 
+            saved.getFacility().getName(), 
+            saved.getStartTime().toLocalDate().toString());
+        eventPublisher.publishEvent(new BookingUpdatedEvent(this, saved, booking.getUser(), "COMPLETED", message));
+        return mapToResponse(saved, admin);
+    }
+
+    @Scheduled(fixedRate = 120000) // Run every 2 minutes (120000 ms)
+    @Transactional
+    public void autoCompleteFinishedBookings() {
+        try {
+            LocalDateTime now = LocalDateTime.now();
+            List<Booking> approvedBookings = bookingRepository.findByStatus(Booking.BookingStatus.APPROVED);
+            
+            List<Booking> finishedBookings = approvedBookings.stream()
+                    .filter(booking -> booking.getEndTime().isBefore(now) || booking.getEndTime().isEqual(now))
+                    .toList();
+            
+            if (!finishedBookings.isEmpty()) {
+                finishedBookings.forEach(booking -> {
+                    booking.setStatus(Booking.BookingStatus.COMPLETED);
+                    Booking saved = bookingRepository.save(booking);
+                    String message = String.format("Your booking for %s on %s has been completed.", 
+                        saved.getFacility().getName(), 
+                        saved.getStartTime().toLocalDate().toString());
+                    eventPublisher.publishEvent(new BookingUpdatedEvent(this, saved, booking.getUser(), "COMPLETED", message));
+                });
+                logger.info("Auto-completed " + finishedBookings.size() + " finished bookings");
+            }
+        } catch (Exception e) {
+            logger.severe("Error in autoCompleteFinishedBookings: " + e.getMessage());
+        }
     }
 
     @Transactional

@@ -154,6 +154,17 @@ export async function adminCancelBooking(token: string, bookingId: number, reaso
   return parseJsonOrThrow<Booking>(response);
 }
 
+export async function completeBooking(token: string, bookingId: number) {
+  const response = await fetch(`${API_BASE_URL}/api/v1/bookings/${bookingId}/complete`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  return parseJsonOrThrow<Booking>(response);
+}
+
 export async function getBookingCalendar(
   token: string,
   facilityId: number | '',
@@ -275,6 +286,61 @@ export function bookingStatusBgTailwind(status: BookingStatus): string {
     default:
       return 'bg-amber-300';
   }
+}
+
+export type BookingCountdown = {
+  isUpcoming: boolean;
+  text: string;
+  days: number;
+  hours: number;
+  minutes: number;
+  seconds: number;
+  totalSeconds: number;
+};
+
+export function getBookingCountdown(startTime: string, nowMs = Date.now()): BookingCountdown | null {
+  const startMs = new Date(startTime).getTime();
+  if (!Number.isFinite(startMs)) {
+    return null;
+  }
+
+  const diffMs = startMs - nowMs;
+  if (diffMs <= 0) {
+    return {
+      isUpcoming: false,
+      text: 'Started',
+      days: 0,
+      hours: 0,
+      minutes: 0,
+      seconds: 0,
+      totalSeconds: 0,
+    };
+  }
+
+  const totalSeconds = Math.floor(diffMs / 1000);
+  const days = Math.floor(totalSeconds / (24 * 60 * 60));
+  const afterDays = totalSeconds % (24 * 60 * 60);
+  const hours = Math.floor(afterDays / (60 * 60));
+  const afterHours = afterDays % (60 * 60);
+  const minutes = Math.floor(afterHours / 60);
+  const seconds = afterHours % 60;
+
+  const parts = [
+    `${days}d`,
+    `${String(hours).padStart(2, '0')}h`,
+    `${String(minutes).padStart(2, '0')}m`,
+    `${String(seconds).padStart(2, '0')}s`,
+  ];
+
+  return {
+    isUpcoming: true,
+    text: parts.join(' '),
+    days,
+    hours,
+    minutes,
+    seconds,
+    totalSeconds,
+  };
 }
 
 // Public Holidays for Sri Lanka (2025, 2026, 2027) - Official Government Holidays

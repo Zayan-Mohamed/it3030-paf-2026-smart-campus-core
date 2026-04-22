@@ -107,6 +107,17 @@ public class BookingController {
         return ResponseEntity.ok(bookingService.adminCancelBooking(user, bookingId, request));
     }
 
+    @PostMapping("/{bookingId}/complete")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<BookingResponse> completeBooking(
+            @AuthenticationPrincipal User user,
+            @PathVariable Long bookingId) {
+        if (user == null) {
+            return ResponseEntity.status(401).build();
+        }
+        return ResponseEntity.ok(bookingService.completeBooking(user, bookingId));
+    }
+
     @PostMapping("/{bookingId}/cancel")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<BookingResponse> cancelBooking(
