@@ -52,6 +52,7 @@ const statusTheme: Record<IncidentStatus, { label: string; pill: string; card: s
 const formatCategory = (value: string) => value.replace(/_/g, ' ');
 
 type IncidentFilter = 'ALL' | 'OPEN' | 'IN_PROGRESS' | 'RESOLVED' | 'REJECTED';
+type PriorityFilter = 'ALL' | IncidentPriority;
 
 const filterTabs: Array<{ key: IncidentFilter; label: string }> = [
   { key: 'ALL', label: 'All' },
@@ -61,10 +62,19 @@ const filterTabs: Array<{ key: IncidentFilter; label: string }> = [
   { key: 'REJECTED', label: 'Rejected' },
 ];
 
+const priorityTabs: Array<{ key: PriorityFilter; label: string }> = [
+  { key: 'ALL', label: 'All Priorities' },
+  { key: 'LOW', label: 'Low' },
+  { key: 'MEDIUM', label: 'Medium' },
+  { key: 'HIGH', label: 'High' },
+  { key: 'CRITICAL', label: 'Critical' },
+];
+
 export const IncidentTicketsPage = () => {
   const { token } = useAuth();
   const [incidents, setIncidents] = useState<Incident[]>([]);
   const [activeFilter, setActiveFilter] = useState<IncidentFilter>('ALL');
+  const [activePriorityFilter, setActivePriorityFilter] = useState<PriorityFilter>('ALL');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -135,19 +145,27 @@ export const IncidentTicketsPage = () => {
   }, [incidents]);
 
   const filteredIncidents = useMemo(() => {
-    switch (activeFilter) {
-      case 'OPEN':
-        return incidents.filter((item) => item.status === 'OPEN');
-      case 'IN_PROGRESS':
-        return incidents.filter((item) => item.status === 'IN_PROGRESS');
-      case 'RESOLVED':
-        return incidents.filter((item) => item.status === 'RESOLVED' || item.status === 'CLOSED');
-      case 'REJECTED':
-        return incidents.filter((item) => item.status === 'CANCELLED');
-      default:
-        return incidents;
+    const statusFiltered = (() => {
+      switch (activeFilter) {
+        case 'OPEN':
+          return incidents.filter((item) => item.status === 'OPEN');
+        case 'IN_PROGRESS':
+          return incidents.filter((item) => item.status === 'IN_PROGRESS');
+        case 'RESOLVED':
+          return incidents.filter((item) => item.status === 'RESOLVED' || item.status === 'CLOSED');
+        case 'REJECTED':
+          return incidents.filter((item) => item.status === 'CANCELLED');
+        default:
+          return incidents;
+      }
+    })();
+
+    if (activePriorityFilter === 'ALL') {
+      return statusFiltered;
     }
-  }, [activeFilter, incidents]);
+
+    return statusFiltered.filter((item) => item.priority === activePriorityFilter);
+  }, [activeFilter, activePriorityFilter, incidents]);
 
   return (
     <div className="mx-auto max-w-6xl space-y-6 px-4 py-6 sm:px-6 lg:px-8">
@@ -186,17 +204,31 @@ export const IncidentTicketsPage = () => {
         </div>
       ) : null}
       {!loading && !error && incidents.length > 0 ? (
-        <div className="flex flex-wrap gap-2">
-          {filterTabs.map((tab) => (
-            <Button
-              key={tab.key}
-              size="sm"
-              variant={activeFilter === tab.key ? 'default' : 'outline'}
-              onClick={() => setActiveFilter(tab.key)}
-            >
-              {tab.label}
-            </Button>
-          ))}
+        <div className="space-y-2">
+          <div className="flex flex-wrap gap-2">
+            {filterTabs.map((tab) => (
+              <Button
+                key={tab.key}
+                size="sm"
+                variant={activeFilter === tab.key ? 'default' : 'outline'}
+                onClick={() => setActiveFilter(tab.key)}
+              >
+                {tab.label}
+              </Button>
+            ))}
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {priorityTabs.map((tab) => (
+              <Button
+                key={tab.key}
+                size="sm"
+                variant={activePriorityFilter === tab.key ? 'default' : 'outline'}
+                onClick={() => setActivePriorityFilter(tab.key)}
+              >
+                {tab.label}
+              </Button>
+            ))}
+          </div>
         </div>
       ) : null}
 
